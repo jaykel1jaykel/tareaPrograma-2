@@ -1,6 +1,9 @@
 from tkinter import *
 from tkinter import ttk
+from faker import Faker
+import random
 import re
+fake = Faker("es_ES")
 
 def ubicarVentana(ventana,ancho,largo):
     pantallaAncho=ventana.winfo_screenwidth()
@@ -28,7 +31,7 @@ subtitulo.pack(pady=5)
 frameMenu = Frame(ventana,bg="#ffffff",bd=4,relief="ridge")
 frameMenu.pack(pady=40)
 # Inicializaciones 
-donantes = [] #Crear diccionario que la llave sea la cedula y la otra informacion sean los datos que se guardan en esa llave
+donantes = {} #Crear diccionario que la llave sea la cedula y la otra informacion sean los datos que se guardan en esa llave
 # ================================ FUNCIONES ========================================
 # =============Funcione de uso general para todas las funciones====================
 
@@ -114,7 +117,6 @@ def tipoSangreInser(frameInsertar):
         values=["O+","O-","A+","A-","B+","B-","AB+","AB-"]
         ).grid(row=3, column = 1)
     return tipoSangre
-
 
 def sexoInser(frameInsertar):
     frameSexo = Frame(frameInsertar, bg = "#ffffff", bd = 5)
@@ -242,12 +244,12 @@ def validarLugarNacimiento(cedula):
 
 def recomendaccionPeso(peso):
     mensaje = ""
-    if int(peso)>=50:
-        mensaje = "usted posee un peso adecuado para donar sangre.\n"
-    elif int(peso) >120:
+    if int(peso)<=50:
+        mensaje = "No puede donar sangre por bajo peso\n"
+    elif int(peso) >=120:
         mensaje = "No puede donar sangre por sobrepeso\n"
     else:
-        mensaje = "No puede donar sangre por bajo peso\n"
+        mensaje = "usted posee un peso adecuado para donar sangre.\n"
     return mensaje
 
 def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso):
@@ -287,7 +289,8 @@ def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,tel
     resultadoCorreo=validarCorreoAux(correo)
     if resultadoCorreo[0]==False:
         return resultadoCorreo
-    donantes.append([cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo]) # Agregar una validacion para que no se repitan datos
+    donantes[cedula]=[nombre,fechaNacimiento,tipoSangre,
+        sexo,peso,telefono,correo]
     return(True,"Donante registrado correctamente")
 
 def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensaje):
@@ -343,9 +346,8 @@ def crearEntradas(frameInsertar):
 #===========funciones usadas principalmente para actualizar donadores==========
 
 def buscarDonante(donantes,cedulaBuscar):
-    for i in range(len(donantes)):
-        if donantes[i][0]==cedulaBuscar:
-            return(True,donantes[i],i)
+    if cedulaBuscar in donantes:
+        return(True,donantes[cedulaBuscar],cedulaBuscar)
     return(False,"No se encontro el donante",-1)
 
 def limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar):
@@ -358,13 +360,12 @@ def limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,co
     correo.set("")
     mensajeActualizar.config(text="")
 
-def guardarActualizacion(donantes,posicion,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar):
-    resultado=validarDatos([],donantes[posicion][0],nombre.get(),fechaNacimiento.get(),tipoSangre.get(),sexo.get(),peso.get(),telefono.get(),correo.get())
+def guardarActualizacion(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar,mensaje):
+    resultado=validarDatos({},cedula,nombre.get(),fechaNacimiento.get(),tipoSangre.get(),sexo.get(),peso.get(),telefono.get(),correo.get())
     if resultado[0]==False:
         mensajeActualizar.config(text=resultado[1],fg="red")
         return
-    donantes[posicion]=[
-        donantes[posicion][0],
+    donantes[cedula]=[
         normalizarNombre(nombre.get())[1],
         fechaNacimiento.get(),
         tipoSangre.get(),
@@ -374,34 +375,20 @@ def guardarActualizacion(donantes,posicion,nombre,fechaNacimiento,tipoSangre,sex
         correo.get()
     ]
     mensajeActualizar.config(text="Donante actualizado correctamente",fg="green")
+    mensaje.config(text= generarAnalisisDonante(cedula,fechaNacimiento.get(),tipoSangre.get(),peso.get()),font=("calibri",11,"bold"))
+    mensaje.pack()
 
-def actualizardatos(ventanaBuscar,cedula,donantes):
-    ventanaBuscar.withdraw()
-    ventanaActualizar=Toplevel()
-    ventanaActualizar.title("Insertar donador")
-    ubicarVentana(ventanaActualizar,900,900)
-    ventanaActualizar.config(bg="#FFFFFF")
-    frameInsertar=Frame(ventanaActualizar,bg="#E6E6E6",bd=5)
-    frameInsertar.pack(pady=20)
-    nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo=crearEntradas(frameInsertar)
-    mensaje = Label(ventanaActualizar,text = "",font= ("arial",12,"bold"), bg = "white",fg= "red")
-    mensaje.pack(pady=10)
-    frameBotones=Frame(ventanaActualizar,bg="#FFFFFF",bd=5)
-    frameBotones.pack(pady=20)
-    mensajeRegistrar = Label(ventanaActualizar,text = "")
-    mensajeRegistrar.pack(pady=20)
-    crearBotones(ventana,frameBotones,ventanaActualizar,mensaje,mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo)
+def cargarDatosActualizar(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo):
+    donante = donantes[cedula]
+    nombre.set(donante[0])
+    fechaNacimiento.set(donante[1])
+    tipoSangre.set(donante[2])
+    sexo.set(donante[3])
+    peso.set(donante[4])
+    telefono.set(donante[5])
+    correo.set(donante[6])
 
-def cargarDatosActualizar(donantes,posicion,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo):
-    nombre.set(donantes[posicion][1])
-    fechaNacimiento.set(donantes[posicion][2])
-    tipoSangre.set(donantes[posicion][3])
-    sexo.set(donantes[posicion][4])
-    peso.set(donantes[posicion][5])
-    telefono.set(donantes[posicion][6])
-    correo.set(donantes[posicion][7])
-
-def abrirVentanaActualizar(ventana,ventanaBuscarActualizar,donantes,posicion):
+def abrirVentanaActualizar(ventana,ventanaBuscarActualizar,donantes,cedula):
     ventanaBuscarActualizar.destroy()
     ventanaActualizar=Toplevel()
     ventanaActualizar.title("Actualizar donador")
@@ -410,14 +397,19 @@ def abrirVentanaActualizar(ventana,ventanaBuscarActualizar,donantes,posicion):
     frameInsertar=Frame(ventanaActualizar,bg="#BB4242",bd=5)
     frameInsertar.pack(pady=20)
     nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo=crearEntradas(frameInsertar)
-    nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo = cargarDatosActualizar(donantes,posicion,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo)
+    cargarDatosActualizar(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo)
     mensajeActualizar=Label(ventanaActualizar,text="",font=("Arial",12,"bold"),bg="white",fg="red")
     mensajeActualizar.pack(pady=10)
     frameBotones=Frame(ventanaActualizar,bg="#FFFFFF",bd=5)
     frameBotones.pack(pady=20)
-    Button(frameBotones,text="Actualizar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:guardarActualizacion(donantes,posicion,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar)).grid(row=0,column=0,padx=10)
-    Button(frameBotones,text="Limpiar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar)).grid(row=0,column=1,padx=10)
-    Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaActualizar.destroy(),ventana.deiconify()]).grid(row=0,column=2,padx=10)
+    mensaje=Label(ventanaActualizar,text="",font=("Arial",12,"bold"),bg="white",fg="red")
+    mensaje.pack(pady=10)
+    Button(frameBotones,text="Actualizar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:guardarActualizacion(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar,mensaje)).grid(row=0,column=0,padx=10)
+    Button(frameBotones,text="Limpiar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar)).grid(row=0,column=1,padx=10)
+    Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",
+        command=lambda:[ventanaActualizar.destroy(),ventana.deiconify()]).grid(row=0,column=2,padx=10)
 
 def buscarDonanteActualizar(ventana,ventanaBuscarActualizar,donantes,cedulaBuscar,mensaje):
     resultado=buscarDonante(donantes,cedulaBuscar.get())
@@ -427,9 +419,75 @@ def buscarDonanteActualizar(ventana,ventanaBuscarActualizar,donantes,cedulaBusca
     mensaje.config(text="Donante encontrado correctamente",fg="green")
     abrirVentanaActualizar(ventana,ventanaBuscarActualizar,donantes,resultado[2])
 
+#==============Generar Donadores==============
+
+def generarNombreSexo():
+    sexo=random.choice([True,False])
+    if sexo==True:
+        nombre=fake.first_name_male()
+    else:
+        nombre=fake.first_name_female()
+    apellido1=fake.last_name()
+    apellido2=fake.last_name()
+    nombreCompleto = nombre+" "+apellido1+" "+apellido2 
+    return nombreCompleto,sexo
+
+def generarCedula():
+    provincia=random.randint(1,7)
+    parte2=random.randint(1000,9999)
+    parte3=random.randint(1000,9999)
+    cedula=f"{provincia}-{parte2}-{parte3}"
+    return cedula
+
+def generarFecha():
+    anno=random.randint(1950,2025)
+    mes=random.randint(1,12)
+    if mes in [1,3,5,7,8,10,12]:
+        maxDias=31
+    elif mes in [4,6,9,11]:
+        maxDias=30
+    else:
+        if anno%4==0 and mes == 2:
+            maxDias=29
+        else:
+            maxDias=28
+    dia=random.randint(1,maxDias)
+    fecha=f"{dia:02d}/{mes:02d}/{anno}"
+    return fecha
+
+def generarTipoSangre():
+    sangre = random.choice(["O+","O-","A+","A-","B+","B-","AB+","AB-"])
+    return sangre
+
+def generarPeso():
+    peso = random.randint(30,300)
+    return peso
+
+def generarTelefono():
+    inicio=random.choice([2,4,6,7,8,9])
+    parte1=random.randint(100,999)
+    parte2=random.randint(1000,9999)
+    telefono=f"{inicio}{parte1}-{parte2}"
+    return telefono
+
+def generarCorreo(nombreCompleto):
+    dominios=["gmail.com","racsa.go.cr","costarricense.cr","ccss.sa.cr"]
+    numero=random.randint(1,999)
+    dominio=random.choice(dominios)
+    nombreCompleto = nombreCompleto.replace(" ","")
+    correo=nombreCompleto.lower()+str(numero)+"@"+dominio
+    return correo
+
+def crearDonadores(donantes,cantidad):
+    cantidad=int(cantidad)
+    contador = 0
+    while contador < cantidad:
+        nombre,sexo=generarNombreSexo()
+        donantes[generarCedula()]=[nombre,generarFecha(),generarTipoSangre(),sexo,generarPeso(),
+            generarTelefono(),generarCorreo(nombre)]
+        contador+=1
 
 #=======Funcion principal=======
-
 
 def insertarDonador(ventana,donantes):
     ventana.withdraw()
@@ -449,8 +507,17 @@ def insertarDonador(ventana,donantes):
     mensajeRegistrar.pack(pady=20)
     crearBotones(ventana,frameBotones,ventanaInsertar,mensaje,mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo)
 
-def generar(donantes):
-    print("hola")
+def generar(ventana,donantes):
+    ventana.withdraw()
+    ventanaGenerar= Toplevel()
+    ventanaGenerar.title("Generar Donadores")
+    ubicarVentana(ventanaGenerar,700,600)
+    ventanaGenerar.config(bg="#ffffff")
+    Label(ventanaGenerar,text="Ingrese la cantidad de donadores que desea generar",bg="#ffffff",font=("Arial",12,"bold")).grid(row=0,pady=20)
+    cantidad= StringVar()
+    Entry(ventanaGenerar,textvariable=cantidad).grid(row=1,pady=20)
+    Button(ventanaGenerar,text="generar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:crearDonadores(donantes,cantidad.get())).grid(row=2,column=0,padx=5)
+    Button(ventanaGenerar,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:salirInser(ventana,ventanaGenerar)).grid(row=2,column=1,padx=5)
 
 def actualizarDonador(ventana,donantes):
     ventana.withdraw()
@@ -484,7 +551,7 @@ Button(frameMenu,text="1. Insertar donador",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",
     command=lambda:insertarDonador(ventana,donantes)).grid(row=1,column=0)
 Button(frameMenu,text="2. Generar donadores",font=("Arial",14),
-    width=30,height=2,bg="#1565c0",fg="white",command=generar).grid(row=1,column=1)
+    width=30,height=2,bg="#1565c0",fg="white",command=lambda:generar(ventana,donantes)).grid(row=1,column=1)
 Button(frameMenu,text="3. Actualizar datos",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",command=lambda:actualizarDonador(ventana,donantes)).grid(row=2,column=0)
 Button(frameMenu,text="4. Eliminar donador",font=("Arial",14),
