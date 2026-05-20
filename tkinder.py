@@ -467,8 +467,35 @@ def actualizarDonador(ventana,donantes):
     Button(ventanaBuscarActualizar,text="Buscar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:buscarDonanteActualizar(ventana,ventanaBuscarActualizar,donantes,cedulaBuscar,mensaje)).pack(pady=20)
     Button(ventanaBuscarActualizar,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaBuscarActualizar.destroy(),ventana.deiconify()]).pack(pady=10)
 
-def eliminar():
-    print("hola")
+def eliminarDonanteAux(ventana,ventanaEliminar,donantes,cedulaBuscar,mensaje):
+    resultadoCedula=cedulaInserAux(cedulaBuscar.get())
+    if resultadoCedula[0]==False:
+        mensaje.config(text=resultadoCedula[1],fg="red")
+        return
+    resultado=buscarDonante(donantes,cedulaBuscar.get())
+    if resultado[0]==False:
+        mensaje.config(text=resultado[1],fg="red")
+        return
+    posicion=resultado[2]
+    del donantes[posicion]
+    mensaje.config(text="Donador eliminado satisfactoriamente",fg="green")
+
+def eliminarDonador(ventana,donantes):
+    ventana.withdraw()
+    ventanaEliminar=Toplevel()
+    ventanaEliminar.title("Eliminar donador")
+    ubicarVentana(ventanaEliminar,700,600)
+    ventanaEliminar.config(bg="#ffffff")
+    Label(ventanaEliminar,text="Ingrese la cedula del donante a eliminar",bg="#ffffff",font=("Arial",12,"bold")).pack(pady=20)
+    frameBuscar=Frame(ventanaEliminar,bg="#ffffff")
+    frameBuscar.pack(pady=10)
+    cedulaBuscar=cedulaInser(frameBuscar)
+    mensaje=Label(ventanaEliminar,text="",bg="#ffffff",font=("Arial",11,"bold"))
+    mensaje.pack(pady=10)
+    Button(ventanaEliminar,text="Eliminar",font=("Arial",12,"bold"),bg="#C62828",fg="white",command=lambda:eliminarDonanteAux(ventana,ventanaEliminar,donantes,cedulaBuscar,mensaje)
+    ).pack(pady=20)
+    Button(ventanaEliminar,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaEliminar.destroy(),ventana.deiconify()]
+    ).pack(pady=10)
 
 def lugares():
     print("Insertar lugar")
@@ -489,7 +516,7 @@ Button(frameMenu,text="3. Actualizar datos",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",command=lambda:actualizarDonador(ventana,donantes)).grid(row=2,column=0)
 Button(frameMenu,text="4. Eliminar donador",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",
-    command=eliminar).grid(row=2,column=1)
+    command=lambda:eliminarDonador(ventana,donantes)).grid(row=2,column=1)
 Button(frameMenu,text="5. Insertar lugar",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",command=lugares).grid(row=3,column=0)
 Button(frameMenu,text="6. Reportes",font=("Arial",14),width=30,
