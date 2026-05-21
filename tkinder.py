@@ -478,14 +478,38 @@ def generarCorreo(nombreCompleto):
     correo=nombreCompleto.lower()+str(numero)+"@"+dominio
     return correo
 
-def crearDonadores(donantes,cantidad):
-    cantidad=int(cantidad)
-    contador = 0
-    while contador < cantidad:
-        nombre,sexo=generarNombreSexo()
-        donantes[generarCedula()]=[nombre,generarFecha(),generarTipoSangre(),sexo,generarPeso(),
-            generarTelefono(),generarCorreo(nombre)]
-        contador+=1
+def crearDonadores(mensaje,donantes,cantidad):
+    if cantidad.isdigit() == True:
+        cantidad=int(cantidad)
+        contador = 0
+        if cantidad<=0:
+            mensaje.config(text="Debe ingresar un numero mayor a cero",fg="red")
+            mensaje.pack()
+        else:
+            while contador < cantidad:
+                nombre,sexo=generarNombreSexo()
+                donantes[generarCedula()]=[nombre,generarFecha(),generarTipoSangre(),sexo,generarPeso(),
+                    generarTelefono(),generarCorreo(nombre)]
+                contador+=1
+            mensaje.config(text="Donadores generados correctamente",fg="green")
+            mensaje.pack()
+    else:
+        mensaje.config(text="Unicamente debe ingresar numeros enteros",fg="red")
+        mensaje.pack()
+
+#==================Eliminar donadores=======================
+def eliminarDonanteAux(donantes,cedulaBuscar,mensaje):
+    resultadoCedula=cedulaInserAux(cedulaBuscar.get())
+    if resultadoCedula[0]==False:
+        mensaje.config(text=resultadoCedula[1],fg="red")
+        return
+    resultado=buscarDonante(donantes,cedulaBuscar.get())
+    if resultado[0]==False:
+        mensaje.config(text=resultado[1],fg="red")
+        return
+    posicion=resultado[2]
+    del donantes[posicion]
+    mensaje.config(text="Donador eliminado satisfactoriamente",fg="green")
 
 #=======Funcion principal=======
 
@@ -513,11 +537,17 @@ def generar(ventana,donantes):
     ventanaGenerar.title("Generar Donadores")
     ubicarVentana(ventanaGenerar,700,600)
     ventanaGenerar.config(bg="#ffffff")
-    Label(ventanaGenerar,text="Ingrese la cantidad de donadores que desea generar",bg="#ffffff",font=("Arial",12,"bold")).grid(row=0,pady=20)
+    frameGenerar= Frame(ventanaGenerar,bg="#ffffff",bd=5)
+    frameGenerar.pack(pady=5)
+    Label(frameGenerar,text="Ingrese la cantidad de donadores que desea generar",bg="#ffffff",font=("Arial",12,"bold")).grid(row=0,pady=20)
     cantidad= StringVar()
-    Entry(ventanaGenerar,textvariable=cantidad).grid(row=1,pady=20)
-    Button(ventanaGenerar,text="generar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:crearDonadores(donantes,cantidad.get())).grid(row=2,column=0,padx=5)
-    Button(ventanaGenerar,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:salirInser(ventana,ventanaGenerar)).grid(row=2,column=1,padx=5)
+    Entry(frameGenerar,textvariable=cantidad).grid(row=1,pady=20)
+    mensaje = Label(ventanaGenerar,text = "",font= ("arial",12,"bold"), bg = "white",fg= "red")
+    mensaje.pack(pady=5)
+    frameBotones= Frame(ventanaGenerar,bg="#ffffff",bd=5)
+    frameBotones.pack(pady=5)
+    Button(frameBotones,text="generar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:crearDonadores(mensaje,donantes,cantidad.get())).grid(row=0,column=0,padx=5)
+    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:salirInser(ventana,ventanaGenerar)).grid(row=0,column=1,padx=5)
 
 def actualizarDonador(ventana,donantes):
     ventana.withdraw()
@@ -534,19 +564,6 @@ def actualizarDonador(ventana,donantes):
     Button(ventanaBuscarActualizar,text="Buscar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:buscarDonanteActualizar(ventana,ventanaBuscarActualizar,donantes,cedulaBuscar,mensaje)).pack(pady=20)
     Button(ventanaBuscarActualizar,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaBuscarActualizar.destroy(),ventana.deiconify()]).pack(pady=10)
 
-def eliminarDonanteAux(ventana,ventanaEliminar,donantes,cedulaBuscar,mensaje):
-    resultadoCedula=cedulaInserAux(cedulaBuscar.get())
-    if resultadoCedula[0]==False:
-        mensaje.config(text=resultadoCedula[1],fg="red")
-        return
-    resultado=buscarDonante(donantes,cedulaBuscar.get())
-    if resultado[0]==False:
-        mensaje.config(text=resultado[1],fg="red")
-        return
-    posicion=resultado[2]
-    del donantes[posicion]
-    mensaje.config(text="Donador eliminado satisfactoriamente",fg="green")
-
 def eliminarDonador(ventana,donantes):
     ventana.withdraw()
     ventanaEliminar=Toplevel()
@@ -559,7 +576,7 @@ def eliminarDonador(ventana,donantes):
     cedulaBuscar=cedulaInser(frameBuscar)
     mensaje=Label(ventanaEliminar,text="",bg="#ffffff",font=("Arial",11,"bold"))
     mensaje.pack(pady=10)
-    Button(ventanaEliminar,text="Eliminar",font=("Arial",12,"bold"),bg="#C62828",fg="white",command=lambda:eliminarDonanteAux(ventana,ventanaEliminar,donantes,cedulaBuscar,mensaje)
+    Button(ventanaEliminar,text="Eliminar",font=("Arial",12,"bold"),bg="#C62828",fg="white",command=lambda:eliminarDonanteAux(donantes,cedulaBuscar,mensaje)
     ).pack(pady=20)
     Button(ventanaEliminar,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaEliminar.destroy(),ventana.deiconify()]
     ).pack(pady=10)
