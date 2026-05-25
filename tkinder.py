@@ -8,8 +8,8 @@ import html
 fake = Faker("ES")
 
 def ubicarVentana(ventana,ancho,largo):
-    pantallaAncho=ventana.winscreenwidth()
-    pantallaLargo=ventana.winscreenheight()
+    pantallaAncho=ventana.winfo_screenwidth()
+    pantallaLargo=ventana.winfo_screenheight()
     x=int((pantallaAncho/2)-(ancho/2))
     y=int((pantallaLargo/2)-(largo/2))-50
     ventana.geometry(f"{ancho}x{largo}+{x}+{y}")
@@ -601,8 +601,92 @@ def reportes(ventana,donantes):
     opciones.pack(pady=10)
     frameBotones = Frame(ventanaReportes,bg="#ffffff")
     frameBotones.pack()
-    Button(frameBotones,text="Aceptar",bg="#5ab86a",fg="white",command= lambda:"opcionesReportes(opcion[opciones.get()],ventanaReportes,donantes")).pack(padx=10)
+    Button(frameBotones,text="Aceptar",bg="#5ab86a",fg="white",command= lambda:opcionesReportes(opcion[opciones.get()],ventanaReportes,donantes)).pack(padx=10)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaReportes.destroy(),ventana.deiconify()]).pack(pady=10)
+
+"""
+def opcionesReportes(opcion,ventanaReporte,donantes,):
+    if opcion == 1:
+        reportePorProvincia(ventanaReporte,donantes)
+    elif opcion ==2:
+        reportePorEdad(ventanaReporte,donantes)
+    elif opcion == 3:
+        reporteTipoSangreProvincia(ventanaReporte,donantes)
+    elif opcion == 4:
+        reporteCompleto(ventanaReporte,donantes)
+    """
+def generarHTMLReportes(filasHTML,mensaje):
+    inicio=datetime.now()
+    ahora=datetime.now()
+    nombreArchivo="reporteDonant"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
+    try:
+        with open(nombreArchivo,"w",encoding="utf-8") as archivo:
+            archivo.write("<!DOCTYPE html>\n")
+            archivo.write("<html lang='es'>\n")
+            archivo.write("<head>\n")
+            archivo.write("<meta charset='UTF-8'>\n")
+            archivo.write("<title>Reporte Donantes</title>\n")
+            archivo.write("</head>\n")
+            archivo.write("<body style='font-family: Arial, sans-serif;'>\n")
+            archivo.write("<h1>Reporte de Donantes</h1>\n")
+            archivo.write(f"<h2>Generado el {ahora.strftime('%d/%m/%y %H:%M:%S')}</h2>\n")
+            final=datetime.now()
+            duracion=final-inicio
+            archivo.write(f"<p><strong>Duración total:</strong> {duracion}</p>\n")
+            archivo.write(f"<p><strong>Cantidad total de donantes:</strong> {len(filasHTML)}</p>\n")
+            archivo.write("<table border='1' style='border-collapse:collapse; text-align:center; width:100%;'>\n")
+            archivo.write("<tr style='background-color:#cccccc;'>\n")
+            archivo.write("<th>Cedula</th>\n")
+            archivo.write("<th>Nombre</th>\n")
+            archivo.write("<th>Fecha nacimiento</th>\n")
+            archivo.write("<th>Tipo sangre</th>\n")
+            archivo.write("<th>Sexo</th>\n")
+            archivo.write("<th>Peso</th>\n")
+            archivo.write("<th>Telefono</th>\n")
+            archivo.write("<th>Correo</th>\n")
+            archivo.write("</tr>\n")
+            for filas in filasHTML:
+                archivo.write(filas)
+            archivo.write("</table>\n")
+            archivo.write("</body>\n")
+            archivo.write("</html>\n")
+        mensaje.config(text="Reporte generado correctamente",fg="green")
+    except:
+        print("ERROR")
+
+def crearFilaHTML(cedula,datos,color):
+    if datos[3]==True:
+        sexo="Masculino"
+    else:
+        sexo="Femenino"
+    fila=f"""
+    <tr style="background-color:{color};">
+        <td>{html.escape(str(cedula))}</td>
+        <td>{html.escape(str(datos[0]))}</td>
+        <td>{html.escape(str(datos[1]))}</td>
+        <td>{html.escape(str(datos[2]))}</td>
+        <td>{sexo}</td>
+        <td>{html.escape(str(datos[4]))}</td>
+        <td>{html.escape(str(datos[5]))}</td>
+        <td>{html.escape(str(datos[6]))}</td>
+    </tr>
+    """
+    return fila
+
+def crearFilasProvincia(numeroProvincia,donantes):
+    filas=[]
+    i=0
+    for cedula,datos in donantes.items():
+        provincia=int(cedula.split("-")[0])
+        if provincia==numeroProvincia:
+            if i%2==0:
+                color="#85a9cc"
+            else:
+                color="#9C8FE6"
+            filas.append(crearFilaHTML(cedula,datos,color))
+            i+=1
+    return filas
+
 
 def salir():
     ventana.destroy()
