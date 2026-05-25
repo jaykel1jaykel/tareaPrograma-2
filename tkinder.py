@@ -1,13 +1,15 @@
 from tkinter import *
 from tkinter import ttk
 from faker import Faker
+from datetime import datetime
 import random
 import re
-fake = Faker("es_ES")
+import html
+fake = Faker("ES")
 
 def ubicarVentana(ventana,ancho,largo):
-    pantallaAncho=ventana.winfo_screenwidth()
-    pantallaLargo=ventana.winfo_screenheight()
+    pantallaAncho=ventana.winscreenwidth()
+    pantallaLargo=ventana.winscreenheight()
     x=int((pantallaAncho/2)-(ancho/2))
     y=int((pantallaLargo/2)-(largo/2))-50
     ventana.geometry(f"{ancho}x{largo}+{x}+{y}")
@@ -166,7 +168,7 @@ def correoInser(frameInsertar):
 def validarCorreoAux(correo):
     if correo == "":
         return(False,"Debe ingresar un correo")
-    formato=r"[a-zA-Z0-9._%+-]+@(gmail\.com|racsa\.go\.cr|costarricense\.cr|ccss\.sa\.cr)$"
+    formato=r"[a-zA-Z0-%+-]+@(gmail\.com|racsa\.go\.cr|costarricense\.cr|ccss\.sa\.cr)$"
     if re.fullmatch(formato,correo)==None:
         return(False,"Correo invalido ejemplo formato de correo correcto ejemplo@gmail.com")
     return(True,correo)
@@ -424,11 +426,11 @@ def buscarDonanteActualizar(ventana,ventanaBuscarActualizar,donantes,cedulaBusca
 def generarNombreSexo():
     sexo=random.choice([True,False])
     if sexo==True:
-        nombre=fake.first_name_male()
+        nombre=fake.firnamale()
     else:
-        nombre=fake.first_name_female()
-    apellido1=fake.last_name()
-    apellido2=fake.last_name()
+        nombre=fake.firnafemale()
+    apellido1=fake.laname()
+    apellido2=fake.laname()
     nombreCompleto = nombre+" "+apellido1+" "+apellido2 
     return nombreCompleto,sexo
 
@@ -584,12 +586,26 @@ def eliminarDonador(ventana,donantes):
 def lugares():
     print("Insertar lugar")
 
-def reportes(donantes):
-    print(donantes)
+def reportes(ventana,donantes):
+    ventana.withdraw()
+    ventanaReportes = Toplevel()
+    ventanaReportes.title("Reporte de donadores")
+    ubicarVentana(ventanaReportes,700,600)
+    ventanaReportes.config(bg="#ffffff")
+    frameReporte= Frame(ventanaReportes,bg="#ffffff")
+    frameReporte.pack()
+    Label(frameReporte,text="INgrese la opcion de reporte:").pack(pady=10)
+    opcion = {"Donantes por provincia":1,"Rango de edad":2,"Tipo de sangre por provincia":3,
+            "Lista completa de donadores":4,"Mujeres donantes O-":5,"A quien puede donar":6,"De quien puede resivir":7,"Donantes no activos":8}
+    opciones=ttk.Combobox(frameReporte,textvariable=opcion,values=list(opcion.keys()))
+    opciones.pack(pady=10)
+    frameBotones = Frame(ventanaReportes,bg="#ffffff")
+    frameBotones.pack()
+    Button(frameBotones,text="Aceptar",bg="#5ab86a",fg="white",command= lambda:"opcionesReportes(opcion[opciones.get()],ventanaReportes,donantes")).pack(padx=10)
+    Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaReportes.destroy(),ventana.deiconify()]).pack(pady=10)
 
 def salir():
     ventana.destroy()
-
 # ---------------- BOTONES ----------------
 Button(frameMenu,text="1. Insertar donador",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",
@@ -604,7 +620,7 @@ Button(frameMenu,text="4. Eliminar donador",font=("Arial",14),
 Button(frameMenu,text="5. Insertar lugar",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",command=lugares).grid(row=3,column=0)
 Button(frameMenu,text="6. Reportes",font=("Arial",14),width=30,
-    height=2,bg="#1565c0",fg="white",command=lambda:reportes(donantes)).grid(row=3,column=1)
+    height=2,bg="#1565c0",fg="white",command=lambda:reportes(ventana,donantes)).grid(row=3,column=1)
 Button(frameMenu,text="7. Salir",font=("Arial",14),width=30,
     height=2,bg="#2e7d32",fg="white",command=salir).grid(row=4,column=0,columnspan=2)
 # ---------------- FOOTER ----------------
