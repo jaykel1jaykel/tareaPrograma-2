@@ -604,6 +604,8 @@ def reportes(ventana,donantes):
     Button(frameBotones,text="Aceptar",bg="#5ab86a",fg="white",command= lambda:opcionesReportes(opcion[opciones.get()],ventanaReportes,donantes)).pack(padx=10)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaReportes.destroy(),ventana.deiconify()]).pack(pady=10)
 
+
+
 """
 def opcionesReportes(opcion,ventanaReporte,donantes,):
     if opcion == 1:
@@ -686,6 +688,107 @@ def crearFilasProvincia(numeroProvincia,donantes):
             filas.append(crearFilaHTML(cedula,datos,color))
             i+=1
     return filas
+
+def reportePorProvincia(ventanaReporte,donantes):
+    ventanaReporte.withdraw()
+    ventanaReporteProvincia = Toplevel()
+    ventanaReporteProvincia.title("Reporte por provincia")
+    ubicarVentana(ventanaReporteProvincia,700,900)
+    ventanaReporteProvincia.config(bg="#ffffff")
+    frameProvincia = Frame(ventanaReporteProvincia,bg="#ffffff")
+    frameProvincia.pack(pady=20)
+    Label(frameProvincia,text="Escoja la provincia de la que quiere generar el reporte").pack(pady=20)
+    provincias={"San Jose":1,"Alajuela":2,"Cartago":3,"Heredia":4,
+        "Guanacaste":5,"Puntarenas":6,"Limon":7}
+    opcion = ttk.Combobox(frameProvincia,values=list(provincias.keys()))
+    opcion.pack()
+    mensaje = Label(frameProvincia,text="")
+    mensaje.pack()
+    frameBotones = Frame(ventanaReporteProvincia,bg="#ffffff")
+    frameBotones.pack()
+    Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:generarHTMLReportes(crearFilasProvincia(provincias[opcion.get()],donantes),donantes,mensaje)).grid(row=0,column=0,padx=5)
+    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:[ventanaReporteProvincia.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
+
+def crearFilasEdad(edadInicial,edadFinal,donantes):
+    filas=[]
+    i=0
+    fechaActual=datetime.now()
+    for cedula,datos in donantes.items():
+        fechaNacimiento=datetime.strptime(datos[1],"%d/%m/%Y")
+        edad=fechaActual.year-fechaNacimiento.year
+        if (fechaActual.month,fechaActual.day)<(fechaNacimiento.month,fechaNacimiento.day):
+            edad-=1
+        if edad>=edadInicial and edad<=edadFinal:
+            if i%2==0:
+                color="#85a9cc"
+            else:
+                color="#9C8FE6"
+            filas.append(crearFilaHTML(cedula,datos,color))
+            i+=1
+    return filas
+    
+def reportePorEdad(ventanaReporte,donantes):
+    ventanaReporte.withdraw()
+    ventanaReporteEdad=Toplevel()
+    ventanaReporteEdad.title("Reporte por edad")
+    ubicarVentana(ventanaReporteEdad,700,900)
+    ventanaReporteEdad.config(bg="#ffffff")
+    frameEdad=Frame(ventanaReporteEdad,bg="#ffffff")
+    frameEdad.pack(pady=20)
+    Label(frameEdad,text="Ingrese el rango de edad",bg="#ffffff").grid(row=0,column=0,columnspan=2,pady=20)
+    Label(frameEdad,text="Edad inicial",bg="#ffffff").grid(row=1,column=0,pady=10)
+    edadInicial=StringVar()
+    Entry(frameEdad,textvariable=edadInicial).grid(row=1,column=1,pady=10)
+    Label(frameEdad,text="Edad final",bg="#ffffff").grid(row=2,column=0,pady=10)
+    edadFinal=StringVar()
+    Entry(frameEdad,textvariable=edadFinal).grid(row=2,column=1,pady=10)
+    mensaje=Label(frameEdad,text="",bg="#ffffff")
+    mensaje.grid(row=3,column=0,columnspan=2,pady=10)
+    frameBotones=Frame(ventanaReporteEdad,bg="#ffffff")
+    frameBotones.pack(pady=20)
+    Button(
+        frameBotones,
+        text="Generar reporte",
+        font=("Arial",12,"bold"),
+        bg="#4773C3",
+        fg="white",
+        command=lambda:generarHTMLReportes(
+            crearFilasEdad(
+                int(edadInicial.get()),
+                int(edadFinal.get()),
+                donantes
+            ),
+            donantes,
+            mensaje
+        )
+    ).grid(row=0,column=0,padx=5)
+    Button(
+        frameBotones,
+        text="Salir",
+        font=("Arial",12,"bold"),
+        bg="#4773C3",
+        fg="white",
+        command=lambda:[
+            ventanaReporteEdad.destroy(),
+            ventanaReporte.deiconify()
+        ]).grid(row=0,column=1,padx=5)
+
+def crearFilasTipoSangreProvincia(tipoSangre,numeroProvincia,donantes):
+    filas=[]
+    i=0
+    for cedula,datos in donantes.items():
+        provincia=int(cedula.split("-")[0])
+        if datos[2]==tipoSangre and provincia==numeroProvincia:
+            if i%2==0:
+                color="#85a9cc"
+            else:
+                color="#9C8FE6"
+            filas.append(crearFilaHTML(cedula,datos,color))
+            i+=1
+    return filas
+
 
 
 def salir():
