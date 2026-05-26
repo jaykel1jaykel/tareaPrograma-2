@@ -33,7 +33,7 @@ subtitulo.pack(pady=5)
 frameMenu = Frame(ventana,bg="#ffffff",bd=4,relief="ridge")
 frameMenu.pack(pady=40)
 # Inicializaciones 
-donantes = {} #Crear diccionario que la llave sea la cedula y la otra informacion sean los datos que se guardan en esa llave
+donantes = [] #Crear matriz de donantes
 # ================================ FUNCIONES ========================================
 # =============Funcione de uso general para todas las funciones====================
 
@@ -67,11 +67,13 @@ def normalizarNombre(pnombre):
     for letra in pnombre:
         if letra.isalpha() == False and letra != " ":
             return(False,"Debe ingresar solamente letras en el nombre")
-    palabras = pnombre.split()     
-    resultado = ""
+    palabras = pnombre.split()
+    if len(palabras) != 3:
+        return (False, "Debe ingresar un nombre y dos apellidos")
+    resultado = []
     for p in palabras:                           
         palabra = p[0].upper() + p[1:].lower() 
-        resultado = resultado + palabra + " "     
+        resultado += palabra  
     return (True,resultado)
 
 def fechaNacimientoInser(frameInsertar):
@@ -168,13 +170,12 @@ def correoInser(frameInsertar):
 def validarCorreoAux(correo):
     if correo == "":
         return(False,"Debe ingresar un correo")
-    formato=r"[a-zA-Z0-%+-]+@(gmail\.com|racsa\.go\.cr|costarricense\.cr|ccss\.sa\.cr)$"
+    formato=r"[a-zA-Z0-9%+-]+@(gmail\.com|racsa\.go\.cr|costarricense\.cr|ccss\.sa\.cr)$"
     if re.fullmatch(formato,correo)==None:
         return(False,"Correo invalido ejemplo formato de correo correcto ejemplo@gmail.com")
     return(True,correo)
 
 #===============================Funciones para la fa funcion de insertar donadores======================================
-#==============================Comentario despues de registrar los datos del donador===========================================
 
 def definirProvincia(n):
     n = int(n)
@@ -291,8 +292,8 @@ def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,tel
     resultadoCorreo=validarCorreoAux(correo)
     if resultadoCorreo[0]==False:
         return resultadoCorreo
-    donantes[cedula]=[nombre,fechaNacimiento,tipoSangre,
-        sexo,peso,telefono,correo]
+    donantes.append([nombre,cedula,fechaNacimiento,tipoSangre,
+        sexo,peso,telefono,correo])
     return(True,"Donante registrado correctamente")
 
 def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensaje):
@@ -347,10 +348,11 @@ def crearEntradas(frameInsertar):
 
 #===========funciones usadas principalmente para actualizar donadores==========
 
-def buscarDonante(donantes,cedulaBuscar):
-    if cedulaBuscar in donantes:
-        return(True,donantes[cedulaBuscar],cedulaBuscar)
-    return(False,"No se encontro el donante",-1)
+def buscarDonante(donantes, cedulaBuscar):
+    for i, donante in enumerate(donantes):
+        if donante[1] == cedulaBuscar:
+            return (True, donante, i) 
+    return (False, "No se encontro el donante", -1)
 
 def limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar):
     nombre.set("")
@@ -362,75 +364,76 @@ def limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,co
     correo.set("")
     mensajeActualizar.config(text="")
 
-def guardarActualizacion(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar,mensaje):
-    resultado=validarDatos({},cedula,nombre.get(),fechaNacimiento.get(),tipoSangre.get(),sexo.get(),peso.get(),telefono.get(),correo.get())
-    if resultado[0]==False:
-        mensajeActualizar.config(text=resultado[1],fg="red")
+# Cambiamos el parámetro "cedula" por "posicion" para saber cuál editar
+def guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar, mensaje):
+    resultado = validarDatos({}, cedula, nombre.get(), fechaNacimiento.get(), tipoSangre.get(), sexo.get(), peso.get(), telefono.get(), correo.get())
+    if resultado[0] == False:
+        mensajeActualizar.config(text=resultado[1], fg="red")
         return
-    donantes[cedula]=[
+    donantes[posicion] = [
         normalizarNombre(nombre.get())[1],
+        cedula,
         fechaNacimiento.get(),
         tipoSangre.get(),
         sexo.get(),
         peso.get(),
         telefono.get(),
-        correo.get()
-    ]
-    mensajeActualizar.config(text="Donante actualizado correctamente",fg="green")
-    mensaje.config(text= generarAnalisisDonante(cedula,fechaNacimiento.get(),tipoSangre.get(),peso.get()),font=("calibri",11,"bold"))
+        correo.get()]
+    mensajeActualizar.config(text="Donante actualizado correctamente", fg="green")
+    mensaje.config(text=generarAnalisisDonante(cedula, fechaNacimiento.get(), tipoSangre.get(), peso.get()), font=("calibri", 11, "bold"))
     mensaje.pack()
 
-def cargarDatosActualizar(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo):
-    donante = donantes[cedula]
+def cargarDatosActualizar(donantes, posicion, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo):
+    donante = donantes[posicion] 
     nombre.set(donante[0])
-    fechaNacimiento.set(donante[1])
-    tipoSangre.set(donante[2])
-    sexo.set(donante[3])
-    peso.set(donante[4])
-    telefono.set(donante[5])
-    correo.set(donante[6])
+    fechaNacimiento.set(donante[2]) 
+    tipoSangre.set(donante[3])
+    sexo.set(donante[4])
+    peso.set(donante[5])
+    telefono.set(donante[6])
+    correo.set(donante[7])
 
-def abrirVentanaActualizar(ventana,ventanaBuscarActualizar,donantes,cedula):
+def abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, posicion, cedula):
     ventanaBuscarActualizar.destroy()
-    ventanaActualizar=Toplevel()
+    ventanaActualizar = Toplevel()
     ventanaActualizar.title("Actualizar donador")
-    ubicarVentana(ventanaActualizar,900,900)
+    ubicarVentana(ventanaActualizar, 900, 900)
     ventanaActualizar.config(bg="#FFFFFF")
-    frameInsertar=Frame(ventanaActualizar,bg="#BB4242",bd=5)
+    frameInsertar = Frame(ventanaActualizar, bg="#BB4242", bd=5)
     frameInsertar.pack(pady=20)
-    nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo=crearEntradas(frameInsertar)
-    cargarDatosActualizar(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo)
-    mensajeActualizar=Label(ventanaActualizar,text="",font=("Arial",12,"bold"),bg="white",fg="red")
+    nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo = crearEntradas(frameInsertar)
+    cargarDatosActualizar(donantes, posicion, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo)
+    mensajeActualizar = Label(ventanaActualizar, text="", font=("Arial", 12, "bold"), bg="white", fg="red")
     mensajeActualizar.pack(pady=10)
-    frameBotones=Frame(ventanaActualizar,bg="#FFFFFF",bd=5)
+    frameBotones = Frame(ventanaActualizar, bg="#FFFFFF", bd=5)
     frameBotones.pack(pady=20)
-    mensaje=Label(ventanaActualizar,text="",font=("Arial",12,"bold"),bg="white",fg="red")
+    mensaje = Label(ventanaActualizar, text="", font=("Arial", 12, "bold"), bg="white", fg="red")
     mensaje.pack(pady=10)
-    Button(frameBotones,text="Actualizar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:guardarActualizacion(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar,mensaje)).grid(row=0,column=0,padx=10)
-    Button(frameBotones,text="Limpiar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensajeActualizar)).grid(row=0,column=1,padx=10)
-    Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",
-        command=lambda:[ventanaActualizar.destroy(),ventana.deiconify()]).grid(row=0,column=2,padx=10)
+    Button(frameBotones, text="Actualizar", font=("Arial", 12, "bold"), bg="#4773C3", fg="white",
+        command=lambda: guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar, mensaje)).grid(row=0, column=0, padx=10)
+    Button(frameBotones, text="Limpiar", font=("Arial", 12, "bold"), bg="#4773C3", fg="white",
+        command=lambda: limpiarActualizacion(nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar)).grid(row=0, column=1, padx=10)
+    Button(frameBotones, text="Regresar", font=("Arial", 12, "bold"), bg="#43C345", fg="white",
+        command=lambda: [ventanaActualizar.destroy(), ventana.deiconify()]).grid(row=0, column=2, padx=10)
 
-def buscarDonanteActualizar(ventana,ventanaBuscarActualizar,donantes,cedulaBuscar,mensaje):
-    resultado=buscarDonante(donantes,cedulaBuscar.get())
-    if resultado[0]==False:
-        mensaje.config(text=resultado[1],fg="red")
+def buscarDonanteActualizar(ventana, ventanaBuscarActualizar, donantes, cedulaBuscar, mensaje):
+    resultado = buscarDonante(donantes, cedulaBuscar.get())
+    if resultado[0] == False:
+        mensaje.config(text=resultado[1], fg="red")
         return
-    mensaje.config(text="Donante encontrado correctamente",fg="green")
-    abrirVentanaActualizar(ventana,ventanaBuscarActualizar,donantes,resultado[2])
+    mensaje.config(text="Donante encontrado correctamente", fg="green")
+    abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, resultado[2], cedulaBuscar.get())
 
 #==============Generar Donadores==============
 
 def generarNombreSexo():
     sexo=random.choice([True,False])
     if sexo==True:
-        nombre=fake.firnamale()
+        nombre=fake.first_name_male()
     else:
-        nombre=fake.firnafemale()
-    apellido1=fake.laname()
-    apellido2=fake.laname()
+        nombre=fake.first_name_female()
+    apellido1=fake.last_name()
+    apellido2=fake.last_name()
     nombreCompleto = nombre+" "+apellido1+" "+apellido2 
     return nombreCompleto,sexo
 
@@ -490,8 +493,8 @@ def crearDonadores(mensaje,donantes,cantidad):
         else:
             while contador < cantidad:
                 nombre,sexo=generarNombreSexo()
-                donantes[generarCedula()]=[nombre,generarFecha(),generarTipoSangre(),sexo,generarPeso(),
-                    generarTelefono(),generarCorreo(nombre)]
+                donantes.append([nombre,generarCedula(),generarFecha(),generarTipoSangre(),sexo,generarPeso(),
+                    generarTelefono(),generarCorreo(nombre)])
                 contador+=1
             mensaje.config(text="Donadores generados correctamente",fg="green")
             mensaje.pack()
@@ -512,6 +515,254 @@ def eliminarDonanteAux(donantes,cedulaBuscar,mensaje):
     posicion=resultado[2]
     del donantes[posicion]
     mensaje.config(text="Donador eliminado satisfactoriamente",fg="green")
+
+#==================Funciones para reportes=======================
+
+def generarHTMLReportes(filasHTML,mensaje):
+    inicio=datetime.now()
+    ahora=datetime.now()
+    nombreArchivo="reporteDonant"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
+    try:
+        with open(nombreArchivo,"w",encoding="utf-8") as archivo:
+            archivo.write("<!DOCTYPE html>\n")
+            archivo.write("<html lang='es'>\n")
+            archivo.write("<head>\n")
+            archivo.write("<meta charset='UTF-8'>\n")
+            archivo.write("<title>Reporte Donantes</title>\n")
+            archivo.write("</head>\n")
+            archivo.write("<body style='font-family: Arial, sans-serif;'>\n")
+            archivo.write("<h1>Reporte de Donantes</h1>\n")
+            archivo.write(f"<h2>Generado el {ahora.strftime('%d/%m/%y %H:%M:%S')}</h2>\n")
+            final=datetime.now()
+            duracion=final-inicio
+            archivo.write(f"<p><strong>Duración total:</strong> {duracion}</p>\n")
+            archivo.write(f"<p><strong>Cantidad total de donantes:</strong> {len(filasHTML)}</p>\n")
+            archivo.write("<table border='1' style='border-collapse:collapse; text-align:center; width:100%;'>\n")
+            archivo.write("<tr style='background-color:#cccccc;'>\n")
+            archivo.write("<th>Cedula</th>\n")
+            archivo.write("<th>Nombre</th>\n")
+            archivo.write("<th>Fecha nacimiento</th>\n")
+            archivo.write("<th>Tipo sangre</th>\n")
+            archivo.write("<th>Sexo</th>\n")
+            archivo.write("<th>Peso</th>\n")
+            archivo.write("<th>Telefono</th>\n")
+            archivo.write("<th>Correo</th>\n")
+            archivo.write("</tr>\n")
+            for filas in filasHTML:
+                archivo.write(filas)
+            archivo.write("</table>\n")
+            archivo.write("</body>\n")
+            archivo.write("</html>\n")
+        mensaje.config(text="Reporte generado correctamente",fg="green")
+    except:
+        print("ERROR")
+
+def crearFilaHTML(cedula,datos,color):
+    if datos[3]==True:
+        sexo="Masculino"
+    else:
+        sexo="Femenino"
+    fila=f"""
+    <tr style="background-color:{color};">
+        <td>{html.escape(str(cedula))}</td>
+        <td>{html.escape(str(datos[0]))}</td>
+        <td>{html.escape(str(datos[1]))}</td>
+        <td>{html.escape(str(datos[2]))}</td>
+        <td>{sexo}</td>
+        <td>{html.escape(str(datos[4]))}</td>
+        <td>{html.escape(str(datos[5]))}</td>
+        <td>{html.escape(str(datos[6]))}</td>
+    </tr>
+    """
+    return fila
+
+def crearFilasProvincia(numeroProvincia, donantes):
+    filas = []
+    i = 0
+    for datos in donantes:
+        cedula = datos[1]
+        provincia = int(cedula.split("-")[0])
+        if provincia == numeroProvincia:
+            if i % 2 == 0:
+                color = "#85a9cc"
+            else:
+                color = "#9C8FE6"
+            filas.append(crearFilaHTML(cedula, datos, color))
+            i += 1
+    return filas
+
+def reportePorProvincia(ventanaReporte,donantes):
+    ventanaReporte.withdraw()
+    ventanaReporteProvincia = Toplevel()
+    ventanaReporteProvincia.title("Reporte por provincia")
+    ubicarVentana(ventanaReporteProvincia,700,900)
+    ventanaReporteProvincia.config(bg="#ffffff")
+    frameProvincia = Frame(ventanaReporteProvincia,bg="#ffffff")
+    frameProvincia.pack(pady=20)
+    Label(frameProvincia,text="Escoja la provincia de la que quiere generar el reporte").pack(pady=20)
+    provincias={"San Jose":1,"Alajuela":2,"Cartago":3,"Heredia":4,
+        "Guanacaste":5,"Puntarenas":6,"Limon":7}
+    opcion = ttk.Combobox(frameProvincia,values=list(provincias.keys()))
+    opcion.pack()
+    mensaje = Label(frameProvincia,text="")
+    mensaje.pack()
+    frameBotones = Frame(ventanaReporteProvincia,bg="#ffffff")
+    frameBotones.pack()
+    Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:generarHTMLReportes(crearFilasProvincia(provincias[opcion.get()],donantes),donantes,mensaje)).grid(row=0,column=0,padx=5)
+    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:[ventanaReporteProvincia.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
+
+def crearFilasEdad(edadInicial, edadFinal, donantes):
+    filas = []
+    i = 0
+    fechaActual = datetime.now()
+    for datos in donantes:
+        cedula = datos[1]
+        fechaNacimiento = datetime.strptime(datos[2], "%d/%m/%Y") 
+        edad = fechaActual.year - fechaNacimiento.year
+        if (fechaActual.month, fechaActual.day) < (fechaNacimiento.month, fechaNacimiento.day):
+            edad -= 1
+        if edad >= edadInicial and edad <= edadFinal:
+            if i % 2 == 0:
+                color = "#85a9cc"
+            else:
+                color = "#9C8FE6"
+            filas.append(crearFilaHTML(cedula, datos, color))
+            i += 1
+    return filas
+    
+def reportePorEdad(ventanaReporte,donantes):
+    ventanaReporte.withdraw()
+    ventanaReporteEdad=Toplevel()
+    ventanaReporteEdad.title("Reporte por edad")
+    ubicarVentana(ventanaReporteEdad,700,900)
+    ventanaReporteEdad.config(bg="#ffffff")
+    frameEdad=Frame(ventanaReporteEdad,bg="#ffffff")
+    frameEdad.pack(pady=20)
+    Label(frameEdad,text="Ingrese el rango de edad",bg="#ffffff").grid(row=0,column=0,columnspan=2,pady=20)
+    Label(frameEdad,text="Edad inicial",bg="#ffffff").grid(row=1,column=0,pady=10)
+    edadInicial=StringVar()
+    Entry(frameEdad,textvariable=edadInicial).grid(row=1,column=1,pady=10)
+    Label(frameEdad,text="Edad final",bg="#ffffff").grid(row=2,column=0,pady=10)
+    edadFinal=StringVar()
+    Entry(frameEdad,textvariable=edadFinal).grid(row=2,column=1,pady=10)
+    mensaje=Label(frameEdad,text="",bg="#ffffff")
+    mensaje.grid(row=3,column=0,columnspan=2,pady=10)
+    frameBotones=Frame(ventanaReporteEdad,bg="#ffffff")
+    frameBotones.pack(pady=20)
+    Button(
+        frameBotones,
+        text="Generar reporte",
+        font=("Arial",12,"bold"),
+        bg="#4773C3",
+        fg="white",
+        command=lambda:generarHTMLReportes(
+            crearFilasEdad(
+                int(edadInicial.get()),
+                int(edadFinal.get()),
+                donantes
+            ),
+            donantes,
+            mensaje
+        )
+    ).grid(row=0,column=0,padx=5)
+    Button(
+        frameBotones,
+        text="Salir",
+        font=("Arial",12,"bold"),
+        bg="#4773C3",
+        fg="white",
+        command=lambda:[
+            ventanaReporteEdad.destroy(),
+            ventanaReporte.deiconify()
+        ]).grid(row=0,column=1,padx=5)
+
+def crearFilasTipoSangreProvincia(tipoSangre, numeroProvincia, donantes):
+    filas = []
+    i = 0
+    for datos in donantes:
+        cedula = datos[1]
+        provincia = int(cedula.split("-")[0])
+        if datos[3] == tipoSangre and provincia == numeroProvincia:
+            if i % 2 == 0:
+                color = "#85a9cc"
+            else:
+                color = "#9C8FE6"
+            filas.append(crearFilaHTML(cedula, datos, color))
+            i += 1
+    return filas
+
+def reporteTipoSangreProvincia(ventanaReporte,donantes):
+    ventanaReporte.withdraw()
+    ventanaReporteSangre=Toplevel()
+    ventanaReporteSangre.title("Reporte tipo sangre provincia")
+    ubicarVentana(ventanaReporteSangre,700,900)
+    ventanaReporteSangre.config(bg="#ffffff")
+    frameReporte=Frame(ventanaReporteSangre,bg="#ffffff")
+    frameReporte.pack(pady=20)
+    Label(
+        frameReporte,
+        text="Seleccione el tipo de sangre y provincia",
+        bg="#ffffff"
+    ).grid(row=0,column=0,columnspan=2,pady=20)
+    Label(
+        frameReporte,
+        text="Tipo sangre",
+        bg="#ffffff"
+    ).grid(row=1,column=0,pady=10)
+    tiposSangre=["O+","O-","A+","A-","B+","B-","AB+","AB-"]
+    opcionSangre=ttk.Combobox(frameReporte,values=tiposSangre)
+    opcionSangre.grid(row=1,column=1,pady=10)
+    Label(frameReporte,text="Provincia",bg="#ffffff").grid(row=2,column=0,pady=10)
+    provincias={"San Jose":1,"Alajuela":2,"Cartago":3,"Heredia":4,"Guanacaste":5,"Puntarenas":6,"Limon":7}
+    opcionProvincia=ttk.Combobox(frameReporte,values=list(provincias.keys()))
+    opcionProvincia.grid(row=2,column=1,pady=10)
+    mensaje=Label(frameReporte,text="",bg="#ffffff")
+    mensaje.grid(row=3,column=0,columnspan=2,pady=10)
+    frameBotones=Frame(ventanaReporteSangre,bg="#ffffff")
+    frameBotones.pack(pady=20)
+    Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:generarHTMLReportes(crearFilasTipoSangreProvincia(opcionSangre.get(),provincias[opcionProvincia.get()],donantes),donantes,mensaje)
+    ).grid(row=0,column=0,padx=5)
+    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:[ventanaReporteSangre.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
+
+def crearFilasCompletaDonadores(donantes):
+    filas = []
+    i = 0
+    for datos in donantes:
+        cedula = datos[1]
+        if i % 2 == 0:
+            color = "#85a9cc"
+        else:
+            color = "#9C8FE6"
+        filas.append(crearFilaHTML(cedula, datos, color))
+        i += 1
+    return filas
+
+def reporteCompleto(ventanaReporte,donantes):
+    frameFinal= Frame(ventanaReporte,bg="white")
+    frameFinal.pack(pady=10)
+    Label(frameFinal, text="Esta seguro que desea hacer el reporte completo").pack()
+    mensaje = Label(frameFinal,text="")
+    mensaje.pack()
+    Button(frameFinal,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:generarHTMLReportes(crearFilasCompletaDonadores(donantes),mensaje)
+    ).pack(pady=10)
+    Button(frameFinal,text="Cancelar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda: frameFinal.destroy()).pack(pady=10)
+
+def opcionesReportes(opcion,ventanaReporte,donantes,):
+    if opcion == 1:
+        reportePorProvincia(ventanaReporte,donantes)
+    elif opcion ==2:
+        reportePorEdad(ventanaReporte,donantes)
+    elif opcion == 3:
+        reporteTipoSangreProvincia(ventanaReporte,donantes)
+    elif opcion == 4:
+        reporteCompleto(ventanaReporte,donantes)
+    
 
 #=======Funcion principal=======
 
@@ -603,251 +854,6 @@ def reportes(ventana,donantes):
     frameBotones.pack()
     Button(frameBotones,text="Aceptar",bg="#5ab86a",fg="white",command= lambda:opcionesReportes(opcion[opciones.get()],ventanaReportes,donantes)).pack(padx=10)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaReportes.destroy(),ventana.deiconify()]).pack(pady=10)
-
-
-
-"""
-def opcionesReportes(opcion,ventanaReporte,donantes,):
-    if opcion == 1:
-        reportePorProvincia(ventanaReporte,donantes)
-    elif opcion ==2:
-        reportePorEdad(ventanaReporte,donantes)
-    elif opcion == 3:
-        reporteTipoSangreProvincia(ventanaReporte,donantes)
-    elif opcion == 4:
-        reporteCompleto(ventanaReporte,donantes)
-    """
-def generarHTMLReportes(filasHTML,mensaje):
-    inicio=datetime.now()
-    ahora=datetime.now()
-    nombreArchivo="reporteDonant"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
-    try:
-        with open(nombreArchivo,"w",encoding="utf-8") as archivo:
-            archivo.write("<!DOCTYPE html>\n")
-            archivo.write("<html lang='es'>\n")
-            archivo.write("<head>\n")
-            archivo.write("<meta charset='UTF-8'>\n")
-            archivo.write("<title>Reporte Donantes</title>\n")
-            archivo.write("</head>\n")
-            archivo.write("<body style='font-family: Arial, sans-serif;'>\n")
-            archivo.write("<h1>Reporte de Donantes</h1>\n")
-            archivo.write(f"<h2>Generado el {ahora.strftime('%d/%m/%y %H:%M:%S')}</h2>\n")
-            final=datetime.now()
-            duracion=final-inicio
-            archivo.write(f"<p><strong>Duración total:</strong> {duracion}</p>\n")
-            archivo.write(f"<p><strong>Cantidad total de donantes:</strong> {len(filasHTML)}</p>\n")
-            archivo.write("<table border='1' style='border-collapse:collapse; text-align:center; width:100%;'>\n")
-            archivo.write("<tr style='background-color:#cccccc;'>\n")
-            archivo.write("<th>Cedula</th>\n")
-            archivo.write("<th>Nombre</th>\n")
-            archivo.write("<th>Fecha nacimiento</th>\n")
-            archivo.write("<th>Tipo sangre</th>\n")
-            archivo.write("<th>Sexo</th>\n")
-            archivo.write("<th>Peso</th>\n")
-            archivo.write("<th>Telefono</th>\n")
-            archivo.write("<th>Correo</th>\n")
-            archivo.write("</tr>\n")
-            for filas in filasHTML:
-                archivo.write(filas)
-            archivo.write("</table>\n")
-            archivo.write("</body>\n")
-            archivo.write("</html>\n")
-        mensaje.config(text="Reporte generado correctamente",fg="green")
-    except:
-        print("ERROR")
-
-def crearFilaHTML(cedula,datos,color):
-    if datos[3]==True:
-        sexo="Masculino"
-    else:
-        sexo="Femenino"
-    fila=f"""
-    <tr style="background-color:{color};">
-        <td>{html.escape(str(cedula))}</td>
-        <td>{html.escape(str(datos[0]))}</td>
-        <td>{html.escape(str(datos[1]))}</td>
-        <td>{html.escape(str(datos[2]))}</td>
-        <td>{sexo}</td>
-        <td>{html.escape(str(datos[4]))}</td>
-        <td>{html.escape(str(datos[5]))}</td>
-        <td>{html.escape(str(datos[6]))}</td>
-    </tr>
-    """
-    return fila
-
-def crearFilasProvincia(numeroProvincia,donantes):
-    filas=[]
-    i=0
-    for cedula,datos in donantes.items():
-        provincia=int(cedula.split("-")[0])
-        if provincia==numeroProvincia:
-            if i%2==0:
-                color="#85a9cc"
-            else:
-                color="#9C8FE6"
-            filas.append(crearFilaHTML(cedula,datos,color))
-            i+=1
-    return filas
-
-def reportePorProvincia(ventanaReporte,donantes):
-    ventanaReporte.withdraw()
-    ventanaReporteProvincia = Toplevel()
-    ventanaReporteProvincia.title("Reporte por provincia")
-    ubicarVentana(ventanaReporteProvincia,700,900)
-    ventanaReporteProvincia.config(bg="#ffffff")
-    frameProvincia = Frame(ventanaReporteProvincia,bg="#ffffff")
-    frameProvincia.pack(pady=20)
-    Label(frameProvincia,text="Escoja la provincia de la que quiere generar el reporte").pack(pady=20)
-    provincias={"San Jose":1,"Alajuela":2,"Cartago":3,"Heredia":4,
-        "Guanacaste":5,"Puntarenas":6,"Limon":7}
-    opcion = ttk.Combobox(frameProvincia,values=list(provincias.keys()))
-    opcion.pack()
-    mensaje = Label(frameProvincia,text="")
-    mensaje.pack()
-    frameBotones = Frame(ventanaReporteProvincia,bg="#ffffff")
-    frameBotones.pack()
-    Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(crearFilasProvincia(provincias[opcion.get()],donantes),donantes,mensaje)).grid(row=0,column=0,padx=5)
-    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:[ventanaReporteProvincia.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
-
-def crearFilasEdad(edadInicial,edadFinal,donantes):
-    filas=[]
-    i=0
-    fechaActual=datetime.now()
-    for cedula,datos in donantes.items():
-        fechaNacimiento=datetime.strptime(datos[1],"%d/%m/%Y")
-        edad=fechaActual.year-fechaNacimiento.year
-        if (fechaActual.month,fechaActual.day)<(fechaNacimiento.month,fechaNacimiento.day):
-            edad-=1
-        if edad>=edadInicial and edad<=edadFinal:
-            if i%2==0:
-                color="#85a9cc"
-            else:
-                color="#9C8FE6"
-            filas.append(crearFilaHTML(cedula,datos,color))
-            i+=1
-    return filas
-    
-def reportePorEdad(ventanaReporte,donantes):
-    ventanaReporte.withdraw()
-    ventanaReporteEdad=Toplevel()
-    ventanaReporteEdad.title("Reporte por edad")
-    ubicarVentana(ventanaReporteEdad,700,900)
-    ventanaReporteEdad.config(bg="#ffffff")
-    frameEdad=Frame(ventanaReporteEdad,bg="#ffffff")
-    frameEdad.pack(pady=20)
-    Label(frameEdad,text="Ingrese el rango de edad",bg="#ffffff").grid(row=0,column=0,columnspan=2,pady=20)
-    Label(frameEdad,text="Edad inicial",bg="#ffffff").grid(row=1,column=0,pady=10)
-    edadInicial=StringVar()
-    Entry(frameEdad,textvariable=edadInicial).grid(row=1,column=1,pady=10)
-    Label(frameEdad,text="Edad final",bg="#ffffff").grid(row=2,column=0,pady=10)
-    edadFinal=StringVar()
-    Entry(frameEdad,textvariable=edadFinal).grid(row=2,column=1,pady=10)
-    mensaje=Label(frameEdad,text="",bg="#ffffff")
-    mensaje.grid(row=3,column=0,columnspan=2,pady=10)
-    frameBotones=Frame(ventanaReporteEdad,bg="#ffffff")
-    frameBotones.pack(pady=20)
-    Button(
-        frameBotones,
-        text="Generar reporte",
-        font=("Arial",12,"bold"),
-        bg="#4773C3",
-        fg="white",
-        command=lambda:generarHTMLReportes(
-            crearFilasEdad(
-                int(edadInicial.get()),
-                int(edadFinal.get()),
-                donantes
-            ),
-            donantes,
-            mensaje
-        )
-    ).grid(row=0,column=0,padx=5)
-    Button(
-        frameBotones,
-        text="Salir",
-        font=("Arial",12,"bold"),
-        bg="#4773C3",
-        fg="white",
-        command=lambda:[
-            ventanaReporteEdad.destroy(),
-            ventanaReporte.deiconify()
-        ]).grid(row=0,column=1,padx=5)
-
-def crearFilasTipoSangreProvincia(tipoSangre,numeroProvincia,donantes):
-    filas=[]
-    i=0
-    for cedula,datos in donantes.items():
-        provincia=int(cedula.split("-")[0])
-        if datos[2]==tipoSangre and provincia==numeroProvincia:
-            if i%2==0:
-                color="#85a9cc"
-            else:
-                color="#9C8FE6"
-            filas.append(crearFilaHTML(cedula,datos,color))
-            i+=1
-    return filas
-
-def reporteTipoSangreProvincia(ventanaReporte,donantes):
-    ventanaReporte.withdraw()
-    ventanaReporteSangre=Toplevel()
-    ventanaReporteSangre.title("Reporte tipo sangre provincia")
-    ubicarVentana(ventanaReporteSangre,700,900)
-    ventanaReporteSangre.config(bg="#ffffff")
-    frameReporte=Frame(ventanaReporteSangre,bg="#ffffff")
-    frameReporte.pack(pady=20)
-    Label(
-        frameReporte,
-        text="Seleccione el tipo de sangre y provincia",
-        bg="#ffffff"
-    ).grid(row=0,column=0,columnspan=2,pady=20)
-    Label(
-        frameReporte,
-        text="Tipo sangre",
-        bg="#ffffff"
-    ).grid(row=1,column=0,pady=10)
-    tiposSangre=["O+","O-","A+","A-","B+","B-","AB+","AB-"]
-    opcionSangre=ttk.Combobox(frameReporte,values=tiposSangre)
-    opcionSangre.grid(row=1,column=1,pady=10)
-    Label(frameReporte,text="Provincia",bg="#ffffff").grid(row=2,column=0,pady=10)
-    provincias={"San Jose":1,"Alajuela":2,"Cartago":3,"Heredia":4,"Guanacaste":5,"Puntarenas":6,"Limon":7}
-    opcionProvincia=ttk.Combobox(frameReporte,values=list(provincias.keys()))
-    opcionProvincia.grid(row=2,column=1,pady=10)
-    mensaje=Label(frameReporte,text="",bg="#ffffff")
-    mensaje.grid(row=3,column=0,columnspan=2,pady=10)
-    frameBotones=Frame(ventanaReporteSangre,bg="#ffffff")
-    frameBotones.pack(pady=20)
-    Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(crearFilasTipoSangreProvincia(opcionSangre.get(),provincias[opcionProvincia.get()],donantes),donantes,mensaje)
-    ).grid(row=0,column=0,padx=5)
-    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:[ventanaReporteSangre.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
-
-def crearFilasCompletaDonadores(donantes):
-    filas=[]
-    i=0
-    for cedula,datos in donantes.items():
-        if i%2==0:
-            color="#85a9cc"
-        else:
-            color="#9C8FE6"
-        filas.append(crearFilaHTML(cedula,datos,color))
-        i+=1
-    return filas
-
-def reporteCompleto(ventanaReporte,donantes):
-    frameFinal= Frame(ventanaReporte,bg="white")
-    frameFinal.pack(pady=10)
-    Label(frameFinal, text="Esta seguro que desea hacer el reporte completo").pack()
-    mensaje = Label(frameFinal,text="")
-    mensaje.pack()
-    Button(frameFinal,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(crearFilasCompletaDonadores(donantes),mensaje)
-    ).pack(pady=10)
-    Button(frameFinal,text="Cancelar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda: frameFinal.destroy()).pack(pady=10)
-    
 
 
 def salir():
