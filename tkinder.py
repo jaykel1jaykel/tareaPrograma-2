@@ -789,6 +789,65 @@ def crearFilasTipoSangreProvincia(tipoSangre,numeroProvincia,donantes):
             i+=1
     return filas
 
+def reporteTipoSangreProvincia(ventanaReporte,donantes):
+    ventanaReporte.withdraw()
+    ventanaReporteSangre=Toplevel()
+    ventanaReporteSangre.title("Reporte tipo sangre provincia")
+    ubicarVentana(ventanaReporteSangre,700,900)
+    ventanaReporteSangre.config(bg="#ffffff")
+    frameReporte=Frame(ventanaReporteSangre,bg="#ffffff")
+    frameReporte.pack(pady=20)
+    Label(
+        frameReporte,
+        text="Seleccione el tipo de sangre y provincia",
+        bg="#ffffff"
+    ).grid(row=0,column=0,columnspan=2,pady=20)
+    Label(
+        frameReporte,
+        text="Tipo sangre",
+        bg="#ffffff"
+    ).grid(row=1,column=0,pady=10)
+    tiposSangre=["O+","O-","A+","A-","B+","B-","AB+","AB-"]
+    opcionSangre=ttk.Combobox(frameReporte,values=tiposSangre)
+    opcionSangre.grid(row=1,column=1,pady=10)
+    Label(frameReporte,text="Provincia",bg="#ffffff").grid(row=2,column=0,pady=10)
+    provincias={"San Jose":1,"Alajuela":2,"Cartago":3,"Heredia":4,"Guanacaste":5,"Puntarenas":6,"Limon":7}
+    opcionProvincia=ttk.Combobox(frameReporte,values=list(provincias.keys()))
+    opcionProvincia.grid(row=2,column=1,pady=10)
+    mensaje=Label(frameReporte,text="",bg="#ffffff")
+    mensaje.grid(row=3,column=0,columnspan=2,pady=10)
+    frameBotones=Frame(ventanaReporteSangre,bg="#ffffff")
+    frameBotones.pack(pady=20)
+    Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:generarHTMLReportes(crearFilasTipoSangreProvincia(opcionSangre.get(),provincias[opcionProvincia.get()],donantes),donantes,mensaje)
+    ).grid(row=0,column=0,padx=5)
+    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:[ventanaReporteSangre.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
+
+def crearFilasCompletaDonadores(donantes):
+    filas=[]
+    i=0
+    for cedula,datos in donantes.items():
+        if i%2==0:
+            color="#85a9cc"
+        else:
+            color="#9C8FE6"
+        filas.append(crearFilaHTML(cedula,datos,color))
+        i+=1
+    return filas
+
+def reporteCompleto(ventanaReporte,donantes):
+    frameFinal= Frame(ventanaReporte,bg="white")
+    frameFinal.pack(pady=10)
+    Label(frameFinal, text="Esta seguro que desea hacer el reporte completo").pack()
+    mensaje = Label(frameFinal,text="")
+    mensaje.pack()
+    Button(frameFinal,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:generarHTMLReportes(crearFilasCompletaDonadores(donantes),mensaje)
+    ).pack(pady=10)
+    Button(frameFinal,text="Cancelar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda: frameFinal.destroy()).pack(pady=10)
+    
 
 
 def salir():
