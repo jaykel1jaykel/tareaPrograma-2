@@ -273,7 +273,7 @@ def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso):
         mensaje+=recomendacion
     return mensaje
 
-def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo):
+def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,guardar=True):
     resultadoCedula=cedulaInserAux(cedula)
     if resultadoCedula[0]==False:
         return resultadoCedula
@@ -292,8 +292,8 @@ def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,tel
     resultadoCorreo=validarCorreoAux(correo)
     if resultadoCorreo[0]==False:
         return resultadoCorreo
-    donantes.append([nombre,cedula,fechaNacimiento,tipoSangre,
-        sexo,peso,telefono,correo])
+    if guardar == True:
+        donantes.append([nombre,cedula,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo])
     return(True,"Donante registrado correctamente")
 
 def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensaje):
@@ -366,7 +366,7 @@ def limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,co
 
 # Cambiamos el parámetro "cedula" por "posicion" para saber cuál editar
 def guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar, mensaje):
-    resultado = validarDatos({}, cedula, nombre.get(), fechaNacimiento.get(), tipoSangre.get(), sexo.get(), peso.get(), telefono.get(), correo.get())
+    resultado = validarDatos(donantes,cedula,nombre.get(),fechaNacimiento.get(),tipoSangre.get(),sexo.get(),peso.get(),telefono.get(),correo.get(),guardar=False)
     if resultado[0] == False:
         mensajeActualizar.config(text=resultado[1], fg="red")
         return
@@ -445,7 +445,7 @@ def generarCedula():
     return cedula
 
 def generarFecha():
-    anno=random.randint(1950,2025)
+    anno=random.randint(1961,2008)
     mes=random.randint(1,12)
     if mes in [1,3,5,7,8,10,12]:
         maxDias=31
@@ -465,7 +465,7 @@ def generarTipoSangre():
     return sangre
 
 def generarPeso():
-    peso = random.randint(30,300)
+    peso = random.randint(50,1200)
     return peso
 
 def generarTelefono():
@@ -558,20 +558,20 @@ def generarHTMLReportes(filasHTML,mensaje):
         print("ERROR")
 
 def crearFilaHTML(cedula,datos,color):
-    if datos[3]==True:
-        sexo="Masculino"
+    if datos[4] == True:
+        sexo = "Masculino"
     else:
-        sexo="Femenino"
+        sexo = "Femenino"
     fila=f"""
     <tr style="background-color:{color};">
-        <td>{html.escape(str(cedula))}</td>
-        <td>{html.escape(str(datos[0]))}</td>
         <td>{html.escape(str(datos[1]))}</td>
+        <td>{html.escape(str(datos[0]))}</td>
         <td>{html.escape(str(datos[2]))}</td>
+        <td>{html.escape(str(datos[3]))}</td>
         <td>{sexo}</td>
-        <td>{html.escape(str(datos[4]))}</td>
         <td>{html.escape(str(datos[5]))}</td>
         <td>{html.escape(str(datos[6]))}</td>
+        <td>{html.escape(str(datos[7]))}</td>
     </tr>
     """
     return fila
@@ -609,7 +609,8 @@ def reportePorProvincia(ventanaReporte,donantes):
     frameBotones = Frame(ventanaReporteProvincia,bg="#ffffff")
     frameBotones.pack()
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(crearFilasProvincia(provincias[opcion.get()],donantes),donantes,mensaje)).grid(row=0,column=0,padx=5)
+        command=lambda:generarHTMLReportes(
+        crearFilasProvincia(provincias[opcion.get()],donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaReporteProvincia.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
@@ -651,32 +652,10 @@ def reportePorEdad(ventanaReporte,donantes):
     mensaje.grid(row=3,column=0,columnspan=2,pady=10)
     frameBotones=Frame(ventanaReporteEdad,bg="#ffffff")
     frameBotones.pack(pady=20)
-    Button(
-        frameBotones,
-        text="Generar reporte",
-        font=("Arial",12,"bold"),
-        bg="#4773C3",
-        fg="white",
-        command=lambda:generarHTMLReportes(
-            crearFilasEdad(
-                int(edadInicial.get()),
-                int(edadFinal.get()),
-                donantes
-            ),
-            donantes,
-            mensaje
-        )
-    ).grid(row=0,column=0,padx=5)
-    Button(
-        frameBotones,
-        text="Salir",
-        font=("Arial",12,"bold"),
-        bg="#4773C3",
-        fg="white",
-        command=lambda:[
-            ventanaReporteEdad.destroy(),
-            ventanaReporte.deiconify()
-        ]).grid(row=0,column=1,padx=5)
+    Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda: generarHTMLReportes(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),donantes),mensaje)).grid(row=0,column=0,padx=5)
+    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:[ventanaReporteEdad.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
 def crearFilasTipoSangreProvincia(tipoSangre, numeroProvincia, donantes):
     filas = []
@@ -723,8 +702,7 @@ def reporteTipoSangreProvincia(ventanaReporte,donantes):
     frameBotones=Frame(ventanaReporteSangre,bg="#ffffff")
     frameBotones.pack(pady=20)
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(crearFilasTipoSangreProvincia(opcionSangre.get(),provincias[opcionProvincia.get()],donantes),donantes,mensaje)
-    ).grid(row=0,column=0,padx=5)
+    command=lambda:generarHTMLReportes(crearFilasTipoSangreProvincia(opcionSangre.get(),provincias[opcionProvincia.get()],donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaReporteSangre.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
