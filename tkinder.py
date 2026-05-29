@@ -465,7 +465,7 @@ def generarTipoSangre():
     return sangre
 
 def generarPeso():
-    peso = random.randint(50,1200)
+    peso = random.randint(50,120)
     return peso
 
 def generarTelefono():
@@ -731,6 +731,79 @@ def reporteCompleto(ventanaReporte,donantes):
     Button(frameFinal,text="Cancelar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda: frameFinal.destroy()).pack(pady=10)
 
+def crearFilasMujeresO(donantes):
+    filas = []
+    i = 0
+    for datos in donantes:
+        cedula = datos[1]
+        if datos[4] == False and datos[3] == "O-":
+            if i % 2 == 0:
+                color = "#85a9cc"
+            else:
+                color = "#9C8FE6"
+            filas.append(crearFilaHTMLMujeresO(datos, color))
+            i += 1
+    return filas
+
+def crearFilaHTMLMujeresO(datos,color):
+    fila=f"""
+    <tr style="background-color:{color};">
+        <td>{html.escape(str(datos[1]))}</td>
+        <td>{html.escape(str(datos[0]))}</td>
+        <td>{html.escape(str(datos[2]))}</td>
+        <td>{html.escape(str(datos[6]))}</td>
+        <td>{html.escape(str(datos[7]))}</td>
+    </tr>
+    """
+    return fila
+
+def generarHTMLMujeresO(filasHTML,mensaje):
+    inicio=datetime.now()
+    ahora=datetime.now()
+    nombreArchivo="reporteMujeresO-"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
+    try:
+        with open(nombreArchivo,"w",encoding="utf-8") as archivo:
+            archivo.write("<!DOCTYPE html>\n")
+            archivo.write("<html lang='es'>\n")
+            archivo.write("<head>\n")
+            archivo.write("<meta charset='UTF-8'>\n")
+            archivo.write("<title>Reporte Mujeres O-</title>\n")
+            archivo.write("</head>\n")
+            archivo.write("<body style='font-family: Arial, sans-serif;'>\n")
+            archivo.write("<h1>Reporte Mujeres Donantes O-</h1>\n")
+            archivo.write(f"<h2>Generado el {ahora.strftime('%d/%m/%y %H:%M:%S')}</h2>\n")
+            final=datetime.now()
+            duracion=final-inicio
+            archivo.write(f"<p><strong>Duración total:</strong> {duracion}</p>\n")
+            archivo.write(f"<p><strong>Cantidad total de donantes:</strong> {len(filasHTML)}</p>\n")
+            archivo.write("<table border='1' style='border-collapse:collapse; text-align:center; width:100%;'>\n")
+            archivo.write("<tr style='background-color:#cccccc;'>\n")
+            archivo.write("<th>Cedula</th>\n")
+            archivo.write("<th>Nombre</th>\n")
+            archivo.write("<th>Fecha nacimiento</th>\n")
+            archivo.write("<th>Telefono</th>\n")
+            archivo.write("<th>Correo</th>\n")
+            archivo.write("</tr>\n")
+            for fila in filasHTML:
+                archivo.write(fila)
+            archivo.write("</table>\n")
+            archivo.write("</body>\n")
+            archivo.write("</html>\n")
+        mensaje.config(text="Reporte generado correctamente",fg="green")
+    except:
+        mensaje.config(text="Error al generar el reporte",fg="red")
+
+def reporteMujeresO(ventanaReporte,donantes):
+    frameFinal = Frame(ventanaReporte,bg="white")
+    frameFinal.pack(pady=10)
+    Label(frameFinal,text="generar reporte de mujeres donantes O-",bg="white",font=("Arial",12)).pack(pady=10)
+    mensaje = Label(frameFinal,text="",bg="white")
+    mensaje.pack()
+    Button(frameFinal,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:generarHTMLMujeresO(crearFilasMujeresO(donantes),mensaje)).pack(pady=10)
+    Button(frameFinal,text="Cancelar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:frameFinal.destroy()).pack(pady=10)
+
 def opcionesReportes(opcion,ventanaReporte,donantes,):
     if opcion == 1:
         reportePorProvincia(ventanaReporte,donantes)
@@ -740,6 +813,8 @@ def opcionesReportes(opcion,ventanaReporte,donantes,):
         reporteTipoSangreProvincia(ventanaReporte,donantes)
     elif opcion == 4:
         reporteCompleto(ventanaReporte,donantes)
+    elif opcion == 5:
+        reporteMujeresO(ventanaReporte,donantes)
     
 
 #=======Funcion principal=======
@@ -823,9 +898,9 @@ def reportes(ventana,donantes):
     ventanaReportes.config(bg="#ffffff")
     frameReporte= Frame(ventanaReportes,bg="#ffffff")
     frameReporte.pack()
-    Label(frameReporte,text="INgrese la opcion de reporte:").pack(pady=10)
+    Label(frameReporte,text="Ingrese la opcion de reporte:").pack(pady=10)
     opcion = {"Donantes por provincia":1,"Rango de edad":2,"Tipo de sangre por provincia":3,
-            "Lista completa de donadores":4,"Mujeres donantes O-":5,"A quien puede donar":6,"De quien puede resivir":7,"Donantes no activos":8}
+            "Lista completa de donadores":4,"Mujeres donantes O-":5,"A quien puede donar":6,"De quien puede recibir":7,"Donantes no activos":8}
     opciones=ttk.Combobox(frameReporte,textvariable=opcion,values=list(opcion.keys()))
     opciones.pack(pady=10)
     frameBotones = Frame(ventanaReportes,bg="#ffffff")
