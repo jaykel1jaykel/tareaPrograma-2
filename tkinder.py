@@ -413,7 +413,7 @@ def recomendaccionPeso(peso):
         mensaje = "usted posee un peso adecuado para donar sangre.\n"
     return mensaje
 
-def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso):
+def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso,lugaresDonacion):
     """
     Funcionamiento: Esta funcion se encarga de generar un analisis del donante a partir de la cedula, fecha de nacimiento, tipo de sangre y peso ingresados por el usuario en la ventana de insertar donante, ademas de retornar un mensaje con el analisis generado
     Entradas:
@@ -424,7 +424,7 @@ def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso):
     Salidas:
     - mensaje: es un mensaje que contiene el analisis del donante generado a partir de los datos ingresados
     """
-    resultadoProvincia=validarLugarNacimiento(cedula)
+    resultadoProvincia=validarLugarNacimiento(cedula,lugaresDonacion)
     edad=mayorEdad(fechaNacimiento)
     comenPeso = recomendaccionPeso(peso)
     compatibilidad=compatibilidadSangre(tipoSangre)
@@ -441,7 +441,7 @@ def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso):
         mensaje+=recomendacion
     return mensaje
 
-def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo):
+def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,guardar=True):
     """
     Funcionamiento: Esta funcion se encarga de validar los datos ingresados por el usuario en la ventana de insertar donante, ademas de agregar el donante a la lista de donantes si todos los datos son validos
     Entradas:
@@ -458,7 +458,6 @@ def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,tel
     - (True, mensaje): si todos los datos son validos, mensaje es un mensaje que indica que el donante fue registrado correctamente
     - (False, mensaje): si algun dato no es valido, mensaje es un mensaje que indica el error encontrado
     """
-def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,guardar=True):
     resultadoCedula=cedulaInserAux(cedula)
     if resultadoCedula[0]==False:
         return resultadoCedula
@@ -483,7 +482,7 @@ def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,tel
         donantes.append([nombre,cedula,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo])
     return(True,"Donante registrado correctamente")
 
-def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensaje):
+def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensaje,lugaresDonacion):
     """
     Funcionamiento: Esta funcion se encarga de registrar el donante a partir de los datos ingresados por el usuario en la ventana de insertar donante, ademas de validar los datos ingresados y mostrar un mensaje con el resultado del registro
     Entradas:
@@ -507,7 +506,7 @@ def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre
         mensaje.config(text=resultado[1],fg="red")
         return
     mensaje.config(text=resultado[1],fg="green")
-    mensajeRegistrar.config(text= generarAnalisisDonante(cedula.get(),fechaNacimiento.get(),tipoSangre.get(),peso.get()),font=("calibri",11,"bold"))
+    mensajeRegistrar.config(text= generarAnalisisDonante(cedula.get(),fechaNacimiento.get(),tipoSangre.get(),peso.get(),lugaresDonacion),font=("calibri",11,"bold"))
     mensajeRegistrar.pack()
 
 def limpiar(cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo):
@@ -554,7 +553,7 @@ def salirInser(ventana,ventanaInsertar):
     ventana.deiconify()
     ventanaInsertar.destroy()
 
-def crearBotones(ventana,frameBotones,ventanaInsertar,mensaje,mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo):
+def crearBotones(ventana,frameBotones,ventanaInsertar,mensaje,mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,lugaresDonacion):
     """
     Funcionamiento: Esta funcion se encarga de crear los botones de la ventana de insertar donante, ademas de asignarles la funcionalidad correspondiente a cada uno
     Entradas:
@@ -578,7 +577,7 @@ def crearBotones(ventana,frameBotones,ventanaInsertar,mensaje,mensajeRegistrar,d
     Button(frameBotones,text="Registrar",font=("Arial",12,"bold"),
         bg="#4773C3",fg="white",
         command=lambda: registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,
-            tipoSangre,sexo,peso,telefono,correo,mensaje)
+            tipoSangre,sexo,peso,telefono,correo,mensaje,lugaresDonacion)
     ).grid(row=0,column=0,padx=10)
     Button(frameBotones,text="Limpiar",
         font=("Arial",12,"bold"),bg="#4773C3",fg="white",
@@ -654,7 +653,7 @@ def limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,co
     correo.set("")
     mensajeActualizar.config(text="")
 
-def guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar, mensaje):
+def guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar, mensaje,lugaresDonacion):
     """
     Funcionamiento: Esta funcion se encarga de guardar la actualizacion del donante a partir de los datos ingresados por el usuario en la ventana de actualizar donante, ademas de validar los datos ingresados y mostrar un mensaje con el resultado de la actualizacion
     Entradas:
@@ -688,7 +687,7 @@ def guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, ti
         telefono.get(),
         correo.get(),1,0]
     mensajeActualizar.config(text="Donante actualizado correctamente", fg="green")
-    mensaje.config(text=generarAnalisisDonante(cedula, fechaNacimiento.get(), tipoSangre.get(), peso.get()), font=("calibri", 11, "bold"))
+    mensaje.config(text=generarAnalisisDonante(cedula, fechaNacimiento.get(), tipoSangre.get(), peso.get(), lugaresDonacion), font=("calibri", 11, "bold"))
     mensaje.pack()
 
 def cargarDatosActualizar(donantes, posicion, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo):
@@ -716,7 +715,7 @@ def cargarDatosActualizar(donantes, posicion, nombre, fechaNacimiento, tipoSangr
     telefono.set(donante[6])
     correo.set(donante[7])
 
-def abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, posicion, cedula):
+def abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, posicion, cedula, lugaresDonacion):
     """
     Funcionamiento: Esta funcion se encarga de abrir la ventana de actualizar donante a partir del donante encontrado en la ventana de buscar donante para actualizar, ademas de cerrar la ventana de buscar donante para actualizar y mostrar la ventana de actualizar donante
     Entradas:
@@ -725,6 +724,7 @@ def abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, posicion,
     - donantes: es la variable que contiene la lista de donantes
     - posicion: es la variable que contiene la posicion del donante en la lista de donantes
     - cedula: es la variable que contiene el valor de la cedula ingresada por el usuario
+    - lugaresDonacion: es la variable que contiene la lista de lugares de donacion disponibles
     Salidas:
     - ventanaBuscarActualizar: se cierra la ventana de buscar donante para actualizar
     - ventanaActualizar: se muestra la ventana de actualizar donante con los datos del donante encontrado cargados en las entradas correspondientes para que el usuario pueda editarlos
@@ -745,13 +745,13 @@ def abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, posicion,
     mensaje = Label(ventanaActualizar, text="", font=("Arial", 12, "bold"), bg="white", fg="red")
     mensaje.pack(pady=10)
     Button(frameBotones, text="Actualizar", font=("Arial", 12, "bold"), bg="#4773C3", fg="white",
-        command=lambda: guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar, mensaje)).grid(row=0, column=0, padx=10)
+        command=lambda: guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar, mensaje,lugaresDonacion)).grid(row=0, column=0, padx=10)
     Button(frameBotones, text="Limpiar", font=("Arial", 12, "bold"), bg="#4773C3", fg="white",
         command=lambda: limpiarActualizacion(nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar)).grid(row=0, column=1, padx=10)
     Button(frameBotones, text="Regresar", font=("Arial", 12, "bold"), bg="#43C345", fg="white",
         command=lambda: [ventanaActualizar.destroy(), ventana.deiconify()]).grid(row=0, column=2, padx=10)
 
-def buscarDonanteActualizar(ventana, ventanaBuscarActualizar, donantes, cedulaBuscar, mensaje):
+def buscarDonanteActualizar(ventana, ventanaBuscarActualizar, donantes, cedulaBuscar, mensaje, lugaresDonacion):
     """
     Funcionamiento: Esta funcion se encarga de buscar un donante en la lista de donantes a partir de la cedula ingresada por el usuario en la ventana de buscar donante para actualizar, ademas de mostrar un mensaje con el resultado de la busqueda y abrir la ventana de actualizar donante si el donante fue encontrado
     Entradas:
@@ -760,6 +760,7 @@ def buscarDonanteActualizar(ventana, ventanaBuscarActualizar, donantes, cedulaBu
     - donantes: es la variable que contiene la lista de donantes
     - cedulaBuscar: es la variable que contiene el valor de la cedula ingresada por el usuario
     - mensaje: es la variable que contiene el mensaje donde se mostrara el resultado de la busqueda
+    - lugaresDonacion: es la variable que contiene la lista de lugares de donacion disponibles
     Salidas:
     - mensaje: es un mensaje que indica el resultado de la busqueda, si el donante fue encontrado se muestra un mensaje indicando que el donante fue encontrado correctamente, si el donante no fue encontrado se muestra un mensaje indicando que no se encontro el donante
     - ventanaActualizar: se muestra la ventana de actualizar donante con los datos del donante encontrado cargados en las entradas correspondientes para que el usuario pueda editarlos, si el donante fue encontrado correctamente
@@ -769,7 +770,7 @@ def buscarDonanteActualizar(ventana, ventanaBuscarActualizar, donantes, cedulaBu
         mensaje.config(text=resultado[1], fg="red")
         return
     mensaje.config(text="Donante encontrado correctamente", fg="green")
-    abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, resultado[2], cedulaBuscar.get())
+    abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, resultado[2], cedulaBuscar.get(), lugaresDonacion)
 
 #==============Generar Donadores==============
 
@@ -844,6 +845,11 @@ def generarPeso():
     return peso
 
 def generarTelefono():
+    """
+    Fuionamiento: Esta funcion se encarga de generar un numero de telefono aleatorio para un donante, utilizando la libreria random para generar los numeros del telefono, ademas de retornar el numero de telefono generado con el formato "inicio-parte1-parte2"
+    Salidas:
+    - telefono: es la variable que contiene el numero de telefono generado para el donante, con el formato "inicio-parte1-parte2", donde inicio es un numero entre 2 y 9, parte1 es un numero entre 100 y 999, y parte2 es un numero entre 1000 y 9999
+    """
     inicio=random.choice([2,4,6,7,8,9])
     parte1=random.randint(100,999)
     parte2=random.randint(1000,9999)
@@ -851,6 +857,13 @@ def generarTelefono():
     return telefono
 
 def generarCorreo(nombreCompleto):
+    """
+    Funcionamiento: Esta funcion se encarga de generar un correo electronico aleatorio para un donante, utilizando la libreria random para seleccionar un dominio de correo de una lista predefinida y generar un numero aleatorio para agregar al correo, ademas de retornar el correo generado con el formato "nombreCompletoNumero@dominio"
+    Entradas:
+    - nombreCompleto: es la variable que contiene el nombre completo del donante, que se utilizara para generar el correo electronico
+    Salidas:
+    - correo: es la variable que contiene el correo electronico generado para el donante, con el formato "nombreCompletoNumero@dominio", donde nombreCompleto es el nombre completo del donante sin espacios y en minusculas, numero es un numero aleatorio entre 1 y 999, y dominio es un dominio de correo seleccionado aleatoriamente de una lista predefinida de dominios de correo
+    """
     dominios=["gmail.com","racsa.go.cr","costarricense.cr","ccss.sa.cr"]
     numero=random.randint(1,999)
     dominio=random.choice(dominios)
@@ -859,6 +872,16 @@ def generarCorreo(nombreCompleto):
     return correo
 
 def crearDonadores(mensaje,donantes,cantidad):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una cantidad especificada de donantes, utilizando las funciones auxiliares para generar sus datos
+    Entradas:
+    - mensaje: es la variable que contiene el mensaje donde se mostrara el resultado de la creacion de los donantes
+    - donantes: es la variable que contiene la lista de donantes, donde se agregaran los donantes generados
+    - cantidad: es la variable que contiene el valor de la cantidad de donantes que se desea generar, ingresada por el usuario
+    Salidas:
+    - mensaje: es un mensaje que indica el resultado de la creacion de los donantes, si la cantidad ingresada es valida se muestra un mensaje indicando que los donantes fueron generados correctamente, si la cantidad ingresada no es valida se muestra un mensaje indicando el error encontrado
+    - donantes: se agregan a la lista de donantes los donantes generados
+    """
     if cantidad.isdigit() == True:
         cantidad=int(cantidad)
         contador = 0
@@ -879,6 +902,20 @@ def crearDonadores(mensaje,donantes,cantidad):
 
 #==================Eliminar donadores=======================
 def confirmarInactivacionEspecifica(donantes, posicion, ventanaJustificar, comboRazon, mensajeOriginal):
+    """
+    Funcionamiento: Esta funcion se encarga de confirmar la inactivacion de un donante a partir de la seleccion del motivo de inactivacion realizada por el usuario en la ventana de justificacion de inactivacion, ademas de actualizar el estado del donante a inhabilitado y guardar el codigo de justificacion en la lista de donantes, cerrar la ventana de justificacion de inactivacion y mostrar un mensaje con el resultado de la inactivacion
+    Entradas:
+    - donantes: es la variable que contiene la lista de donantes
+    - posicion: es la variable que contiene la posicion del donante en la lista de donantes
+    - ventanaJustificar: es la variable que contiene la ventana de justificacion de inactivacion, que se cerrara despues de confirmar la inactivacion
+    - comboRazon: es la variable que contiene el combobox donde el usuario selecciona el motivo de inactivacion, que se utilizara para obtener el codigo de justificacion seleccionado por el usuario
+    - mensajeOriginal: es la variable que contiene el mensaje donde se mostrara el resultado de la inactivacion, que se actualizara despues de confirmar la inactivacion
+    Salidas:
+    - donantes: se actualiza el estado del donante a inhabilitado y se guarda el codigo de justificacion en la lista de donantes
+    - ventanaJustificar: se cierra la ventana de justificacion de inactivacion
+    - mensajeOriginal: se muestra un mensaje indicando que el donante fue inhabilitado satisfactoriamente, con el estado actualizado a 0, si la inactivacion fue confirmada correctamente, si no se selecciono un motivo de inactivacion valido se muestra un mensaje indicando que se debe seleccionar un motivo valido para confirmar la inactivacion
+    - comboRazon: se obtiene el codigo de justificacion seleccionado por el usuario en el combobox para guardar en la lista de donantes, si no se selecciono un motivo de inactivacion valido se muestra un mensaje indicando que se debe seleccionar un motivo valido para confirmar la inactivacion
+    """
     seleccion = comboRazon.get()
     if not seleccion:
         Label(ventanaJustificar, text="¡Debe seleccionar un motivo válido!", fg="red", bg="white").pack()
@@ -890,6 +927,16 @@ def confirmarInactivacionEspecifica(donantes, posicion, ventanaJustificar, combo
     mensajeOriginal.config(text="Donador inhabilitado satisfactoriamente (Estado: 0)", fg="green")
 
 def eliminarDonanteAux(donantes, cedulaBuscar, mensaje):
+    """
+    Funcionamiento: Esta funcion se encarga de eliminar un donante a partir de la cedula ingresada por el usuario en la ventana de eliminar donante, ademas de mostrar un mensaje con el resultado de la eliminacion
+    Entradas:
+    - donantes: es la variable que contiene la lista de donantes
+    - cedulaBuscar: es la variable que contiene el valor de la cedula ingresada
+    - mensaje: es la variable que contiene el mensaje donde se mostrara el resultado de la eliminacion
+    Salidas:
+    - mensaje: es un mensaje que indica el resultado de la eliminacion, si el donante fue encontrado y se inhabilito correctamente se muestra un mensaje indicando que el donante fue inhabilitado satisfactoriamente, si el donante no fue encontrado se muestra un mensaje indicando que no se encontro el donante, si el donante ya se encuentra inhabilitado se muestra un mensaje indicando que el donante ya se encuentra inhabilitado
+    - ventanaJustificar: se muestra la ventana de justificacion de inactivacion para que el usuario seleccione el motivo de inactivacion, si el donante fue encontrado y se encuentra habilitado, si el donante no fue encontrado o ya se encuentra inhabilitado no se muestra la ventana de justificacion de inactivacion
+    """
     resultadoCedula = cedulaInserAux(cedulaBuscar.get())
     if resultadoCedula[0] == False:
         mensaje.config(text=resultadoCedula[1], fg="red")
@@ -930,6 +977,15 @@ def eliminarDonanteAux(donantes, cedulaBuscar, mensaje):
 #==================Funciones para reportes=======================
 
 def generarHTMLReportes(filasHTML,mensaje):
+    """
+    Funcionamiento: Esta funcion se encarga de generar un reporte en formato HTML a partir de las filas HTML generadas para cada donante, ademas de mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - filasHTML: es la variable que contiene la lista de filas HTML generadas para cada donante, que se utilizara para construir el contenido del reporte en formato HTML
+    - mensaje: es la variable que contiene el mensaje donde se mostrara el resultado de la generacion del reporte, que se actualizara despues de generar el reporte
+    Salidas:
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte, si el reporte fue generado correctamente se muestra un mensaje indicando que el reporte fue generado correctamente, si hubo un error al generar el reporte se muestra un mensaje indicando que hubo un error al generar el reporte
+    - reporte HTML: se genera un archivo HTML con el contenido del reporte construido a partir de las filas HTML generadas para cada donante, si el reporte fue generado correctamente, si hubo un error al generar el reporte no se genera el archivo HTML
+    """
     inicio=datetime.now()
     ahora=datetime.now()
     nombreArchivo="reporteDonant"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
@@ -970,17 +1026,23 @@ def generarHTMLReportes(filasHTML,mensaje):
         print("ERROR")
 
 def crearFilaHTML(cedula,datos,color):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una fila en formato HTML para un donante a partir de sus datos, ademas de retornar la fila HTML generada
+    Entradas:
+    - cedula: es la variable que contiene el valor de la cedula del donante, que se utilizara para mostrar en la fila HTML
+    - datos: es la variable que contiene la lista de datos del donante, que se utilizara para mostrar en la fila HTML
+    - color: es la variable que contiene el valor del color de fondo que se utilizara para la fila HTML, que se asignara de forma alternada para cada fila para mejorar la legibilidad del reporte
+     Salidas:
+    - fila: es la variable que contiene la fila en formato HTML generada para el donante, que incluye las celdas con los datos del donante y el color de fondo asignado, que se utilizara para construir el contenido del reporte en formato HTML
+    """
     if datos[4] == True:
         sexo = "Masculino"
     else:
         sexo = "Femenino"
     fila=f"""
     <tr style="background-color:{color};">
-<<<<<<< HEAD
         <td>{html.escape(str(cedula))}</td>
-=======
         <td>{html.escape(str(datos[1]))}</td>
->>>>>>> 4cd44dbb2c46bfc5c9882c289347ac4c732cb1d7
         <td>{html.escape(str(datos[0]))}</td>
         <td>{html.escape(str(datos[2]))}</td>
         <td>{html.escape(str(datos[3]))}</td>
@@ -988,15 +1050,20 @@ def crearFilaHTML(cedula,datos,color):
         <td>{html.escape(str(datos[5]))}</td>
         <td>{html.escape(str(datos[6]))}</td>
         <td>{html.escape(str(datos[7]))}</td>
-<<<<<<< HEAD
         <td>{html.escape(str(datos[9]))}</td>
-=======
->>>>>>> 4cd44dbb2c46bfc5c9882c289347ac4c732cb1d7
     </tr>
     """
     return fila
 
 def crearFilasProvincia(numeroProvincia, donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para los donantes que pertenecen a una provincia especifica, a partir de sus datos, ademas de retornar la lista de filas HTML generadas
+    Entradas:
+    - numeroProvincia: es la variable que contiene el valor del numero de la provincia seleccionada
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para filtrar los donantes que pertenecen a la provincia seleccionada y generar las filas HTML correspondientes para cada uno de ellos
+    Salidas:
+    - filas: es la variable que contiene la lista de filas en formato HTML generadas para los donantes que pertenecen a la provincia seleccionada, que se utilizara para construir el contenido del reporte en formato HTML, si no se encontraron donantes para la provincia seleccionada se retorna una lista vacia
+    """
     filas = []
     i = 0
     for datos in donantes:
@@ -1012,6 +1079,16 @@ def crearFilasProvincia(numeroProvincia, donantes):
     return filas
 
 def reportePorProvincia(ventanaReporte,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario seleccione la provincia de la que desea generar un reporte, ademas de generar el reporte en formato HTML para los donantes que pertenecen a la provincia seleccionada y mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - ventanaReporte: es la variable que contiene la ventana principal de reportes, que se ocultara para mostrar la ventana de seleccion de provincia y se mostrara nuevamente despues de cerrar la ventana de seleccion de provincia
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para filtrar los donantes que pertenecen a la provincia seleccionada y generar el reporte en formato HTML correspondiente para cada uno de ellos
+     Salidas:
+    - ventanaReporte: se oculta la ventana principal de reportes para mostrar la ventana de seleccion de provincia, y se muestra nuevamente despues de cerrar la ventana de seleccion de provincia
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte, si el reporte fue generado correctamente se muestra un mensaje indicando que el reporte fue generado correctamente, si hubo un error al generar el reporte se muestra un mensaje indicando que hubo un error al generar el reporte
+    - reporte HTML: se genera un archivo HTML con el contenido del reporte construido a partir de las filas HTML generadas para los donantes que pertenecen a la provincia seleccionada, si el reporte fue generado correctamente, si hubo un error al generar el reporte no se genera el archivo HTML
+    """
     ventanaReporte.withdraw()
     ventanaReporteProvincia = Toplevel()
     ventanaReporteProvincia.title("Reporte por provincia")
@@ -1037,6 +1114,15 @@ def reportePorProvincia(ventanaReporte,donantes):
         command=lambda:[ventanaReporteProvincia.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
 def crearFilasEdad(edadInicial, edadFinal, donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para los donantes que se encuentran dentro de un rango de edad especifico, a partir de sus datos, ademas de retornar la lista de filas HTML generadas
+    Entradas:
+    - edadInicial: es la variable que contiene el valor de la edad inicial del rango de edad seleccionado por el usuario, que se utilizara para filtrar los donantes que se encuentran dentro del rango de edad seleccionado y generar las filas HTML correspondientes para cada uno de ellos
+    - edadFinal: es la variable que contiene el valor de la edad final del rango de edad seleccionado por el usuario, que se utilizara para filtrar los donantes que se encuentran dentro del rango de edad seleccionado y generar las filas HTML correspondientes para cada uno de ellos
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para filtrar los donantes que se encuentran dentro del rango de edad seleccionado y generar las filas HTML correspondientes para cada uno de ellos
+    Salidas:
+    - filas: es la variable que contiene la lista de filas en formato HTML generadas para los donantes que se encuentran dentro del rango de edad seleccionado, que se utilizara para construir el contenido del reporte en formato HTML, si no se encontraron donantes para el rango de edad seleccionado se retorna una lista vacia
+    """
     filas = []
     i = 0
     fechaActual = datetime.now()
@@ -1056,6 +1142,16 @@ def crearFilasEdad(edadInicial, edadFinal, donantes):
     return filas
 
 def reportePorEdad(ventanaReporte,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario ingrese el rango de edad del que desea generar un reporte, ademas de generar el reporte en formato HTML para los donantes que se encuentran dentro del rango de edad ingresado y mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - ventanaReporte: es la variable que contiene la ventana principal de reportes, que se ocultara para mostrar la ventana de ingreso de rango de edad y se mostrara nuevamente despues de cerrar la ventana de ingreso de rango de edad
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para filtrar los donantes que se encuentran dentro del rango de edad ingresado y generar el reporte en formato HTML correspondiente para cada uno de ellos
+    Salidas:
+    - ventanaReporte: se oculta la ventana principal de reportes para mostrar la ventana de ingreso de rango de edad, y se muestra nuevamente despues de cerrar la ventana de ingreso de rango de edad
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte, si el reporte fue generado correctamente se muestra un mensaje indicando que el reporte fue generado correctamente, si hubo un error al generar el reporte se muestra un mensaje indicando que hubo un error al generar el reporte
+    - reporte HTML: se genera un archivo HTML con el contenido del reporte construido a partir de las filas HTML generadas para los donantes que se encuentran dentro del rango de edad ingresado, si el reporte fue generado correctamente, si hubo un error al generar el reporte no se genera el archivo HTML
+    """
     ventanaReporte.withdraw()
     ventanaReporteEdad=Toplevel()
     ventanaReporteEdad.title("Reporte por edad")
@@ -1086,6 +1182,15 @@ def reportePorEdad(ventanaReporte,donantes):
         command=lambda:[ventanaReporteEdad.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
 def crearFilasTipoSangreProvincia(tipoSangre, numeroProvincia, donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para los donantes que tienen un tipo de sangre especifico y pertenecen a una provincia especifica, a partir de sus datos, ademas de retornar la lista de filas HTML generadas
+    Entradas:
+    - tipoSangre: es la variable que contiene el valor del tipo de sangre seleccionado por el usuario, que se utilizara para filtrar los donantes que tienen el tipo de sangre seleccionado y generar las filas HTML correspondientes para cada uno de ellos
+    - numeroProvincia: es la variable que contiene el valor del numero de la provincia seleccionada por el usuario, que se utilizara para filtrar los donantes que pertenecen a la provincia seleccionada y generar las filas HTML correspondientes para cada uno de ellos
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para filtrar los donantes que tienen el tipo de sangre seleccionado y pertenecen a la provincia seleccionada, y generar las filas HTML correspondientes para cada uno de ellos
+    Salidas:
+    - filas: es la variable que contiene la lista de filas en formato HTML generadas para los donantes que tienen el tipo de sangre seleccionado y pertenecen a la provincia seleccionada, que se utilizara para construir el contenido del reporte en formato HTML, si no se encontraron donantes para el tipo de sangre y provincia seleccionados se retorna una lista vacia
+    """
     filas = []
     i = 0
     for datos in donantes:
@@ -1101,6 +1206,16 @@ def crearFilasTipoSangreProvincia(tipoSangre, numeroProvincia, donantes):
     return filas
 
 def reporteTipoSangreProvincia(ventanaReporte,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario seleccione el tipo de sangre y la provincia de la que desea generar un reporte, ademas de generar el reporte en formato HTML para los donantes que tienen el tipo de sangre seleccionado y pertenecen a la provincia seleccionada, y mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - ventanaReporte: es la variable que contiene la ventana principal de reportes, que se ocultara para mostrar la ventana de seleccion de tipo de sangre y provincia, y se mostrara nuevamente despues de cerrar la ventana de seleccion de tipo de sangre y provincia
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para filtrar los donantes que tienen el tipo de sangre seleccionado y pertenecen a la provincia seleccionada, y generar el reporte en formato HTML correspondiente para cada uno de ellos
+    Salidas:
+    - ventanaReporte: se oculta la ventana principal de reportes para mostrar la ventana de seleccion de tipo de sangre y provincia, y se muestra nuevamente despues de cerrar la ventana de seleccion de tipo de sangre y provincia
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte, si el reporte fue generado correctamente se muestra un mensaje indicando que el reporte fue generado correctamente, si hubo un error al generar el reporte se muestra un mensaje indicando que hubo un error al generar el reporte
+    - reporte HTML: se genera un archivo HTML con el contenido del reporte construido a partir de las filas HTML generadas para los donantes que tienen el tipo de sangre seleccionado y pertenecen a la provincia seleccionada, si el reporte fue generado correctamente, si hubo un error al generar el reporte no se genera el archivo HTML
+    """
     ventanaReporte.withdraw()
     ventanaReporteSangre=Toplevel()
     ventanaReporteSangre.title("Reporte tipo sangre provincia")
@@ -1133,11 +1248,16 @@ def reporteTipoSangreProvincia(ventanaReporte,donantes):
         command=lambda:generarHTMLReportes(crearFilasTipoSangreProvincia(opcionSangre.get(),provincias[opcionProvincia.get()],donantes),mensaje)
     ).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-    command=lambda:generarHTMLReportes(crearFilasTipoSangreProvincia(opcionSangre.get(),provincias[opcionProvincia.get()],donantes),mensaje)).grid(row=0,column=0,padx=5)
-    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaReporteSangre.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
 def crearFilasCompletaDonadores(donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para todos los donantes registrados, a partir de sus datos, ademas de retornar la lista de filas HTML generadas
+    Entradas:
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para generar las filas HTML correspondientes para cada uno de ellos, sin aplicar ningun filtro, ya que se generaran filas HTML para todos los donantes registrados
+    Salidas:
+    - filas: es la variable que contiene la lista de filas en formato HTML generadas para todos los donantes registrados, que se utilizara para construir el contenido del reporte en formato HTML, si no se encontraron donantes registrados se retorna una lista vacia
+    """
     filas = []
     i = 0
     for datos in donantes:
@@ -1151,6 +1271,16 @@ def crearFilasCompletaDonadores(donantes):
     return filas
 
 def reporteCompleto(ventanaReporte,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de generar un reporte completo de todos los donantes registrados en formato HTML, a partir de sus datos, ademas de mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - ventanaReporte: es la variable que contiene la ventana principal de reportes, que se ocultara para mostrar la ventana de confirmacion de generacion de reporte completo, y se mostrara nuevamente despues de cerrar la ventana de confirmacion de generacion de reporte completo
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para generar el reporte completo en formato HTML para todos los donantes registrados, sin aplicar ningun filtro, ya que se generaran filas HTML para todos los donantes registrados
+     Salidas:
+    - ventanaReporte: se oculta la ventana principal de reportes para mostrar la ventana de confirmacion de generacion de reporte completo, y se muestra nuevamente despues de cerrar la ventana de confirmacion de generacion de reporte completo
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte completo, si el reporte completo fue generado correctamente se muestra un mensaje indicando que el reporte completo fue generado correctamente, si hubo un error al generar el reporte completo se muestra un mensaje indicando que hubo un error al generar el reporte completo
+    - reporte HTML: se genera un archivo HTML con el contenido del reporte completo construido a partir de las filas HTML generadas para todos los donantes registrados, si el reporte completo fue generado correctamente, si hubo un error al generar el reporte completo no se genera el archivo HTML
+    """
     frameFinal= Frame(ventanaReporte,bg="white")
     frameFinal.pack(pady=10)
     Label(frameFinal, text="Esta seguro que desea hacer el reporte completo").pack()
@@ -1162,7 +1292,16 @@ def reporteCompleto(ventanaReporte,donantes):
     Button(frameFinal,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda: frameFinal.destroy()).pack(pady=10)
 
-def opcionesReportes(opcion,ventanaReporte,donantes,):
+def opcionesReportes(opcion,ventanaReporte,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de redirigir a la funcion correspondiente para generar el reporte seleccionado por el usuario, a partir de la opcion seleccionada en la ventana de reportes, ademas de mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - opcion: es la variable que contiene el valor de la opcion seleccionada por el usuario en la ventana de reportes, que se utilizara para redirigir a la funcion correspondiente para generar el reporte seleccionado por el usuario
+    - ventanaReporte: es la variable que contiene la ventana principal de reportes, que se ocultara para mostrar la ventana de seleccion de opciones de reporte, y se mostrara nuevamente despues de cerrar la ventana de seleccion de opciones de reporte
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para generar el reporte seleccionado por el usuario en formato HTML para los donantes correspondientes, dependiendo de la opcion seleccionada por el usuario
+    Salidas:
+    - Llama a la funcion correspondiente para generar el reporte seleccionado por el usuario, dependiendo de la opcion seleccionada por el usuario, si la opcion seleccionada por el usuario no corresponde a ninguna opcion valida se muestra un mensaje indicando que la opcion seleccionada no es valida
+    """
     if opcion == 1:
         reportePorProvincia(ventanaReporte,donantes)
     elif opcion ==2:
@@ -1174,7 +1313,18 @@ def opcionesReportes(opcion,ventanaReporte,donantes,):
 
 #=======Funcion principal=======
 
-def insertarDonador(ventana,donantes):
+def insertarDonador(ventana,donantes,lugaresDonacion):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario ingrese los datos de un nuevo donante, ademas de validar los datos ingresados, registrar el nuevo donante en la lista de donantes, y mostrar un mensaje con el resultado del registro del nuevo donante
+    Entradas:
+    - ventana: es la variable que contiene la ventana principal del programa, que se ocultara para mostrar la ventana de ingreso de datos del nuevo donante, y se mostrara nuevamente despues de cerrar la ventana de ingreso de datos del nuevo donante
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para registrar el nuevo donante ingresado por el usuario, agregando los datos del nuevo donante a la lista de donantes, y para validar los datos ingresados por el usuario, verificando que la cedula ingresada no se encuentre registrada en la lista de donantes, y que los datos ingresados cumplan con los formatos requeridos
+    - lugaresDonacion: es la variable que contiene la lista de lugares de donacion, que se utilizara para validar el lugar de donacion ingresado por el usuario, verificando que el lugar de donacion ingresado se encuentre registrado en la lista de lugares de donacion
+    Salidas:
+    - ventana: se oculta la ventana principal del programa para mostrar la ventana de ingreso de datos del nuevo donante, y se muestra nuevamente despues de cerrar la ventana de ingreso de datos del nuevo donante
+    - mensaje: es un mensaje que indica el resultado del registro del nuevo donante, si el nuevo donante fue registrado correctamente se muestra un mensaje indicando que el nuevo donante fue registrado correctamente, si hubo un error al registrar el nuevo donante se muestra un mensaje indicando que hubo un error al registrar el nuevo donante, como por ejemplo si la cedula ingresada ya se encuentra registrada en la lista de donantes, o si los datos ingresados no cumplen con los formatos requeridos
+    - nuevo donante registrado: se agrega el nuevo donante a la lista de donantes con los datos ingresados por el usuario, si el nuevo donante fue registrado correctamente, si hubo un error al registrar el nuevo donante no se agrega el nuevo donante a la lista de donantes
+    """
     ventana.withdraw()
     ventanaInsertar=Toplevel()
     ventanaInsertar.title("Insertar donador")
@@ -1190,9 +1340,19 @@ def insertarDonador(ventana,donantes):
     frameBotones.pack(pady=20)
     mensajeRegistrar = Label(ventanaInsertar,text = "")
     mensajeRegistrar.pack(pady=20)
-    crearBotones(ventana,frameBotones,ventanaInsertar,mensaje,mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo)
+    crearBotones(ventana,frameBotones,ventanaInsertar,mensaje,mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,lugaresDonacion)
 
 def generar(ventana,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario ingrese la cantidad de donadores que desea generar, ademas de generar la cantidad de donadores ingresada por el usuario, registrar los nuevos donadores en la lista de donadores, y mostrar un mensaje con el resultado de la generacion de los nuevos donadores
+    Entradas:
+    - ventana: es la variable que contiene la ventana principal del programa, que se ocultara para mostrar la ventana de ingreso de cantidad de donadores a generar, y se mostrara nuevamente despues de cerrar la ventana de ingreso de cantidad de donadores a generar
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para registrar los nuevos donadores generados por el programa, agregando los datos de los nuevos donadores a la lista de donantes, y para validar la cantidad de donadores ingresada por el usuario, verificando que la cantidad de donadores ingresada sea un numero entero positivo
+    Salidas:
+    - ventana: se oculta la ventana principal del programa para mostrar la ventana de ingreso de cantidad de donadores a generar, y se muestra nuevamente despues de cerrar la ventana de ingreso de cantidad de donadores a generar
+    - mensaje: es un mensaje que indica el resultado de la generacion de los nuevos donadores, si los nuevos donadores fueron generados correctamente se muestra un mensaje indicando que los nuevos donadores fueron generados correctamente, si hubo un error al generar los nuevos donadores se muestra un mensaje indicando que hubo un error al generar los nuevos donadores, como por ejemplo si la cantidad de donadores ingresada no es un numero entero positivo
+    - nuevos donadores generados: se generan la cantidad de nuevos donadores ingresada por el usuario, con datos aleatorios, y se agregan a la lista de donantes, si los nuevos donadores fueron generados correctamente, si hubo un error al generar los nuevos donadores no se generan los nuevos donadores ni se agregan a la lista de donantes
+    """
     ventana.withdraw()
     ventanaGenerar= Toplevel()
     ventanaGenerar.title("Generar Donadores")
@@ -1210,7 +1370,18 @@ def generar(ventana,donantes):
     Button(frameBotones,text="generar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:crearDonadores(mensaje,donantes,cantidad.get())).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:salirInser(ventana,ventanaGenerar)).grid(row=0,column=1,padx=5)
 
-def actualizarDonador(ventana,donantes):
+def actualizarDonador(ventana,donantes,lugaresDonacion):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario ingrese la cedula del donante que desea actualizar, ademas de validar la cedula ingresada, buscar el donante correspondiente a la cedula ingresada en la lista de donantes, mostrar los datos actuales del donante encontrado, permitir al usuario ingresar los nuevos datos del donante, validar los nuevos datos ingresados, actualizar los datos del donante en la lista de donantes, y mostrar un mensaje con el resultado de la actualizacion del donante
+    Entradas:
+    - ventana: es la variable que contiene la ventana principal del programa, que se ocultara para mostrar la ventana de ingreso de cedula del donante a actualizar, y se mostrara nuevamente despues de cerrar la ventana de ingreso de cedula del donante a actualizar
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para buscar el donante correspondiente a la cedula ingresada por el usuario, verificando que la cedula ingresada se encuentre registrada en la lista de donantes, y para actualizar los datos del donante encontrado en la lista de donantes, reemplazando los datos actuales del donante con los nuevos datos ingresados por el usuario, si la actualizacion del donante fue realizada correctamente
+    - lugaresDonacion: es la variable que contiene la lista de lugares de donacion, que se utilizara para validar el nuevo lugar de donacion ingresado por el usuario, verificando que el nuevo lugar de donacion ingresado se encuentre registrado en la lista de lugares de donacion
+    Salidas:
+    - ventana: se oculta la ventana principal del programa para mostrar la ventana de ingreso de cedula del donante a actualizar, y se muestra nuevamente despues de cerrar la ventana de ingreso de cedula del donante a actualizar
+    - mensaje: es un mensaje que indica el resultado de la actualizacion del donante, si el donante fue actualizado correctamente se muestra un mensaje indicando que el donante fue actualizado correctamente, si hubo un error al actualizar el donante se muestra un mensaje indicando que hubo un error al actualizar el donante, como por ejemplo si la cedula ingresada no se encuentra registrada en la lista de donantes, o si los nuevos datos ingresados no cumplen con los formatos requeridos
+    - donante actualizado: se actualizan los datos del donante encontrado en la lista de donantes con los nuevos datos ingresados por el usuario, si el donante fue actualizado correctamente, si hubo un error al actualizar el donante no se actualizan los datos del donante en la lista de donantes
+    """
     ventana.withdraw()
     ventanaBuscarActualizar=Toplevel()
     ventanaBuscarActualizar.title("Buscar donador")
@@ -1222,10 +1393,20 @@ def actualizarDonador(ventana,donantes):
     cedulaBuscar=cedulaInser(frameBuscar)
     mensaje=Label(ventanaBuscarActualizar,text="",bg="#ffffff",font=("Arial",11,"bold"))
     mensaje.pack(pady=10)
-    Button(ventanaBuscarActualizar,text="Buscar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:buscarDonanteActualizar(ventana,ventanaBuscarActualizar,donantes,cedulaBuscar,mensaje)).pack(pady=20)
+    Button(ventanaBuscarActualizar,text="Buscar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:buscarDonanteActualizar(ventana,ventanaBuscarActualizar,donantes,cedulaBuscar,mensaje,lugaresDonacion)).pack(pady=20)
     Button(ventanaBuscarActualizar,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaBuscarActualizar.destroy(),ventana.deiconify()]).pack(pady=10)
 
 def eliminarDonador(ventana,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario ingrese la cedula del donante que desea eliminar, ademas de validar la cedula ingresada, buscar el donante correspondiente a la cedula ingresada en la lista de donantes, eliminar el donante encontrado de la lista de donantes, y mostrar un mensaje con el resultado de la eliminacion del donante
+    Entradas:
+    - ventana: es la variable que contiene la ventana principal del programa, que se ocultara para mostrar la ventana de ingreso de cedula del donante a eliminar, y se mostrara nuevamente despues de cerrar la ventana de ingreso de cedula del donante a eliminar
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para buscar el donante correspondiente a la cedula ingresada por el usuario, verificando que la cedula ingresada se encuentre registrada en la lista de donantes, y para eliminar el donante encontrado de la lista de donantes, si la eliminacion del donante fue realizada correctamente
+    Salidas:
+    - ventana: se oculta la ventana principal del programa para mostrar la ventana de ingreso de cedula del donante a eliminar, y se muestra nuevamente despues de cerrar la ventana de ingreso de cedula del donante a eliminar
+    - mensaje: es un mensaje que indica el resultado de la eliminacion del donante, si el donante fue eliminado correctamente se muestra un mensaje indicando que el donante fue eliminado correctamente, si hubo un error al eliminar el donante se muestra un mensaje indicando que hubo un error al eliminar el donante, como por ejemplo si la cedula ingresada no se encuentra registrada en la lista de donantes
+    - donante eliminado: se elimina el donante encontrado de la lista de donantes, si el donante fue eliminado correctamente, si hubo un error al eliminar el donante no se elimina el donante de la lista de donantes
+    """
     ventana.withdraw()
     ventanaEliminar=Toplevel()
     ventanaEliminar.title("Eliminar donador")
@@ -1251,10 +1432,20 @@ def lugaresDeDonacion(ventana,donantes,lugares):
     frameLugares = Frame(ventanaLugares,bg="#ffffff")
     frameLugares.pack()
     Label(frameLugares,text="Provincias",bg="#ffffff",font=("Arial",12,"bold")).grid(row=0,column=0,pady=10,padx=10)
-    provincia = ttk.Combobox(frameLugares,)
+    provincia = ttk.Combobox(frameLugares)
 
 
 def reportes(ventana,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario seleccione la opcion de reporte que desea generar, ademas de redirigir a la funcion correspondiente para generar el reporte seleccionado por el usuario, y mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - ventana: es la variable que contiene la ventana principal del programa, que se ocultara para mostrar la ventana de seleccion de opciones de reporte, y se mostrara nuevamente despues de cerrar la ventana de seleccion de opciones de reporte
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para generar el reporte seleccionado por el usuario en formato HTML para los donantes correspondientes, dependiendo de la opcion seleccionada por el usuario
+     Salidas:
+    - ventana: se oculta la ventana principal del programa para mostrar la ventana de seleccion de opciones de reporte, y se muestra nuevamente despues de cerrar la ventana de seleccion de opciones de reporte
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte seleccionado por el usuario, si el reporte seleccionado por el usuario fue generado correctamente se muestra un mensaje indicando que el reporte seleccionado por el usuario fue generado correctamente, si hubo un error al generar el reporte seleccionado por el usuario se muestra un mensaje indicando que hubo un error al generar el reporte seleccionado por el usuario, como por ejemplo si la opcion seleccionada por el usuario no corresponde a ninguna opcion valida
+    - reporte HTML: se genera un archivo HTML con el contenido del reporte seleccionado por el usuario construido a partir de las filas HTML generadas para los donantes correspondientes, dependiendo de la opcion seleccionada por el usuario, si el reporte seleccionado por el usuario fue generado correctamente, si hubo un error al generar el reporte seleccionado por el usuario no se genera el archivo HTML
+    """
     ventana.withdraw()
     ventanaReportes = Toplevel()
     ventanaReportes.title("Reporte de donadores")
@@ -1277,11 +1468,11 @@ def salir():
 # ---------------- BOTONES ----------------
 Button(frameMenu,text="1. Insertar donador",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",
-    command=lambda:insertarDonador(ventana,donantes)).grid(row=1,column=0)
+    command=lambda:insertarDonador(ventana,donantes,lugaresDonacion)).grid(row=1,column=0)
 Button(frameMenu,text="2. Generar donadores",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",command=lambda:generar(ventana,donantes)).grid(row=1,column=1)
 Button(frameMenu,text="3. Actualizar datos",font=("Arial",14),
-    width=30,height=2,bg="#1565c0",fg="white",command=lambda:actualizarDonador(ventana,donantes)).grid(row=2,column=0)
+    width=30,height=2,bg="#1565c0",fg="white",command=lambda:actualizarDonador(ventana,donantes,lugaresDonacion)).grid(row=2,column=0)
 Button(frameMenu,text="4. Eliminar donador",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",
     command=lambda:eliminarDonador(ventana,donantes)).grid(row=2,column=1)
