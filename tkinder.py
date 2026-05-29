@@ -58,11 +58,7 @@ def cedulaInser(frameInsertar):
     Entradas:
     - frameInsertar: es el frame donde se desea crear la entrada
     Salidas:
-<<<<<<< Updated upstream
     - cedula: es la variable que contiene el valor de la cedula ingresada por el usuario
-=======
-- cedula: es la variable que contiene el valor de la cedula ingresada por el usuario
->>>>>>> Stashed changes
     """
     Label(frameInsertar, text = "Cedula", font=("Arial",14,"bold"),fg="#0D1764").grid(row= 0,column=0,pady=5)
     cedula = StringVar()
@@ -417,11 +413,7 @@ def recomendaccionPeso(peso):
         mensaje = "usted posee un peso adecuado para donar sangre.\n"
     return mensaje
 
-<<<<<<< Updated upstream
 def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso,lugaresDonacion):
-=======
-def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso):
->>>>>>> Stashed changes
     """
     Funcionamiento: Esta funcion se encarga de generar un analisis del donante a partir de la cedula, fecha de nacimiento, tipo de sangre y peso ingresados por el usuario en la ventana de insertar donante, ademas de retornar un mensaje con el analisis generado
     Entradas:
@@ -432,11 +424,7 @@ def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso):
     Salidas:
     - mensaje: es un mensaje que contiene el analisis del donante generado a partir de los datos ingresados
     """
-<<<<<<< Updated upstream
     resultadoProvincia=validarLugarNacimiento(cedula,lugaresDonacion)
-=======
-    resultadoProvincia=validarLugarNacimiento(cedula)
->>>>>>> Stashed changes
     edad=mayorEdad(fechaNacimiento)
     comenPeso = recomendaccionPeso(peso)
     compatibilidad=compatibilidadSangre(tipoSangre)
@@ -453,11 +441,7 @@ def generarAnalisisDonante(cedula,fechaNacimiento,tipoSangre,peso):
         mensaje+=recomendacion
     return mensaje
 
-<<<<<<< Updated upstream
 def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,guardar=True):
-=======
-def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo):
->>>>>>> Stashed changes
     """
     Funcionamiento: Esta funcion se encarga de validar los datos ingresados por el usuario en la ventana de insertar donante, ademas de agregar el donante a la lista de donantes si todos los datos son validos
     Entradas:
@@ -494,17 +478,11 @@ def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,tel
         return resultadoCorreo
     donantes.append([nombre,cedula,fechaNacimiento,tipoSangre,
         sexo,peso,telefono,correo,1,0])
-<<<<<<< Updated upstream
     if guardar == True:
         donantes.append([nombre,cedula,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo])
     return(True,"Donante registrado correctamente")
 
 def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensaje,lugaresDonacion):
-=======
-    return(True,"Donante registrado correctamente")
-
-def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensaje):
->>>>>>> Stashed changes
     """
     Funcionamiento: Esta funcion se encarga de registrar el donante a partir de los datos ingresados por el usuario en la ventana de insertar donante, ademas de validar los datos ingresados y mostrar un mensaje con el resultado del registro
     Entradas:
@@ -575,11 +553,7 @@ def salirInser(ventana,ventanaInsertar):
     ventana.deiconify()
     ventanaInsertar.destroy()
 
-<<<<<<< Updated upstream
 def crearBotones(ventana,frameBotones,ventanaInsertar,mensaje,mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,lugaresDonacion):
-=======
-def crearBotones(ventana,frameBotones,ventanaInsertar,mensaje,mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo):
->>>>>>> Stashed changes
     """
     Funcionamiento: Esta funcion se encarga de crear los botones de la ventana de insertar donante, ademas de asignarles la funcionalidad correspondiente a cada uno
     Entradas:
@@ -679,11 +653,7 @@ def limpiarActualizacion(nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,co
     correo.set("")
     mensajeActualizar.config(text="")
 
-<<<<<<< Updated upstream
 def guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar, mensaje,lugaresDonacion):
-=======
-def guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, tipoSangre, sexo, peso, telefono, correo, mensajeActualizar, mensaje):
->>>>>>> Stashed changes
     """
     Funcionamiento: Esta funcion se encarga de guardar la actualizacion del donante a partir de los datos ingresados por el usuario en la ventana de actualizar donante, ademas de validar los datos ingresados y mostrar un mensaje con el resultado de la actualizacion
     Entradas:
@@ -703,10 +673,7 @@ def guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, ti
     - guarda la actualizacion del donante en la lista de donantes y muestra un mensaje con el resultado de la actualizacion, si la actualizacion fue exitosa se muestra un mensaje con el analisis del donante actualizado, si la actualizacion no fue exitosa se muestra un mensaje con el error encontrado
     """
     resultado = validarDatos([], cedula, nombre.get(), fechaNacimiento.get(), tipoSangre.get(), sexo.get(), peso.get(), telefono.get(), correo.get())
-<<<<<<< Updated upstream
     resultado = validarDatos(donantes,cedula,nombre.get(),fechaNacimiento.get(),tipoSangre.get(),sexo.get(),peso.get(),telefono.get(),correo.get(),guardar=False)
-=======
->>>>>>> Stashed changes
     if resultado[0] == False:
         mensajeActualizar.config(text=resultado[1], fg="red")
         return
@@ -748,11 +715,7 @@ def cargarDatosActualizar(donantes, posicion, nombre, fechaNacimiento, tipoSangr
     telefono.set(donante[6])
     correo.set(donante[7])
 
-<<<<<<< Updated upstream
 def abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, posicion, cedula, lugaresDonacion):
-=======
-def abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, posicion, cedula):
->>>>>>> Stashed changes
     """
     Funcionamiento: Esta funcion se encarga de abrir la ventana de actualizar donante a partir del donante encontrado en la ventana de buscar donante para actualizar, ademas de cerrar la ventana de buscar donante para actualizar y mostrar la ventana de actualizar donante
     Entradas:
@@ -761,10 +724,7 @@ def abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, posicion,
     - donantes: es la variable que contiene la lista de donantes
     - posicion: es la variable que contiene la posicion del donante en la lista de donantes
     - cedula: es la variable que contiene el valor de la cedula ingresada por el usuario
-<<<<<<< Updated upstream
     - lugaresDonacion: es la variable que contiene la lista de lugares de donacion disponibles
-=======
->>>>>>> Stashed changes
     Salidas:
     - ventanaBuscarActualizar: se cierra la ventana de buscar donante para actualizar
     - ventanaActualizar: se muestra la ventana de actualizar donante con los datos del donante encontrado cargados en las entradas correspondientes para que el usuario pueda editarlos
@@ -791,11 +751,7 @@ def abrirVentanaActualizar(ventana, ventanaBuscarActualizar, donantes, posicion,
     Button(frameBotones, text="Regresar", font=("Arial", 12, "bold"), bg="#43C345", fg="white",
         command=lambda: [ventanaActualizar.destroy(), ventana.deiconify()]).grid(row=0, column=2, padx=10)
 
-<<<<<<< Updated upstream
 def buscarDonanteActualizar(ventana, ventanaBuscarActualizar, donantes, cedulaBuscar, mensaje, lugaresDonacion):
-=======
-def buscarDonanteActualizar(ventana, ventanaBuscarActualizar, donantes, cedulaBuscar, mensaje):
->>>>>>> Stashed changes
     """
     Funcionamiento: Esta funcion se encarga de buscar un donante en la lista de donantes a partir de la cedula ingresada por el usuario en la ventana de buscar donante para actualizar, ademas de mostrar un mensaje con el resultado de la busqueda y abrir la ventana de actualizar donante si el donante fue encontrado
     Entradas:
@@ -804,10 +760,7 @@ def buscarDonanteActualizar(ventana, ventanaBuscarActualizar, donantes, cedulaBu
     - donantes: es la variable que contiene la lista de donantes
     - cedulaBuscar: es la variable que contiene el valor de la cedula ingresada por el usuario
     - mensaje: es la variable que contiene el mensaje donde se mostrara el resultado de la busqueda
-<<<<<<< Updated upstream
     - lugaresDonacion: es la variable que contiene la lista de lugares de donacion disponibles
-=======
->>>>>>> Stashed changes
     Salidas:
     - mensaje: es un mensaje que indica el resultado de la busqueda, si el donante fue encontrado se muestra un mensaje indicando que el donante fue encontrado correctamente, si el donante no fue encontrado se muestra un mensaje indicando que no se encontro el donante
     - ventanaActualizar: se muestra la ventana de actualizar donante con los datos del donante encontrado cargados en las entradas correspondientes para que el usuario pueda editarlos, si el donante fue encontrado correctamente
@@ -949,7 +902,6 @@ def crearDonadores(mensaje,donantes,cantidad):
 
 #==================Eliminar donadores=======================
 def confirmarInactivacionEspecifica(donantes, posicion, ventanaJustificar, comboRazon, mensajeOriginal):
-<<<<<<< Updated upstream
     """
     Funcionamiento: Esta funcion se encarga de confirmar la inactivacion de un donante a partir de la seleccion del motivo de inactivacion realizada por el usuario en la ventana de justificacion de inactivacion, ademas de actualizar el estado del donante a inhabilitado y guardar el codigo de justificacion en la lista de donantes, cerrar la ventana de justificacion de inactivacion y mostrar un mensaje con el resultado de la inactivacion
     Entradas:
@@ -964,8 +916,6 @@ def confirmarInactivacionEspecifica(donantes, posicion, ventanaJustificar, combo
     - mensajeOriginal: se muestra un mensaje indicando que el donante fue inhabilitado satisfactoriamente, con el estado actualizado a 0, si la inactivacion fue confirmada correctamente, si no se selecciono un motivo de inactivacion valido se muestra un mensaje indicando que se debe seleccionar un motivo valido para confirmar la inactivacion
     - comboRazon: se obtiene el codigo de justificacion seleccionado por el usuario en el combobox para guardar en la lista de donantes, si no se selecciono un motivo de inactivacion valido se muestra un mensaje indicando que se debe seleccionar un motivo valido para confirmar la inactivacion
     """
-=======
->>>>>>> Stashed changes
     seleccion = comboRazon.get()
     if not seleccion:
         Label(ventanaJustificar, text="¡Debe seleccionar un motivo válido!", fg="red", bg="white").pack()
@@ -977,7 +927,6 @@ def confirmarInactivacionEspecifica(donantes, posicion, ventanaJustificar, combo
     mensajeOriginal.config(text="Donador inhabilitado satisfactoriamente (Estado: 0)", fg="green")
 
 def eliminarDonanteAux(donantes, cedulaBuscar, mensaje):
-<<<<<<< Updated upstream
     """
     Funcionamiento: Esta funcion se encarga de eliminar un donante a partir de la cedula ingresada por el usuario en la ventana de eliminar donante, ademas de mostrar un mensaje con el resultado de la eliminacion
     Entradas:
@@ -988,8 +937,6 @@ def eliminarDonanteAux(donantes, cedulaBuscar, mensaje):
     - mensaje: es un mensaje que indica el resultado de la eliminacion, si el donante fue encontrado y se inhabilito correctamente se muestra un mensaje indicando que el donante fue inhabilitado satisfactoriamente, si el donante no fue encontrado se muestra un mensaje indicando que no se encontro el donante, si el donante ya se encuentra inhabilitado se muestra un mensaje indicando que el donante ya se encuentra inhabilitado
     - ventanaJustificar: se muestra la ventana de justificacion de inactivacion para que el usuario seleccione el motivo de inactivacion, si el donante fue encontrado y se encuentra habilitado, si el donante no fue encontrado o ya se encuentra inhabilitado no se muestra la ventana de justificacion de inactivacion
     """
-=======
->>>>>>> Stashed changes
     resultadoCedula = cedulaInserAux(cedulaBuscar.get())
     if resultadoCedula[0] == False:
         mensaje.config(text=resultadoCedula[1], fg="red")
@@ -1026,10 +973,6 @@ def eliminarDonanteAux(donantes, cedulaBuscar, mensaje):
 
 #===============Funciones para Insertar lugar de donacion====================
 
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 
 #==================Funciones para reportes=======================
 
@@ -1099,10 +1042,7 @@ def crearFilaHTML(cedula,datos,color):
     fila=f"""
     <tr style="background-color:{color};">
         <td>{html.escape(str(cedula))}</td>
-<<<<<<< Updated upstream
         <td>{html.escape(str(datos[1]))}</td>
-=======
->>>>>>> Stashed changes
         <td>{html.escape(str(datos[0]))}</td>
         <td>{html.escape(str(datos[2]))}</td>
         <td>{html.escape(str(datos[3]))}</td>
@@ -1168,12 +1108,9 @@ def reportePorProvincia(ventanaReporte,donantes):
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:generarHTMLReportes(crearFilasProvincia(provincias[opcion.get()],donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-<<<<<<< Updated upstream
         command=lambda:generarHTMLReportes(
         crearFilasProvincia(provincias[opcion.get()],donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-=======
->>>>>>> Stashed changes
         command=lambda:[ventanaReporteProvincia.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
 def crearFilasEdad(edadInicial, edadFinal, donantes):
@@ -1238,13 +1175,10 @@ def reportePorEdad(ventanaReporte,donantes):
         command=lambda:generarHTMLReportes(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),
                 donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-<<<<<<< Updated upstream
         command=lambda:generarHTMLReportes(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda: generarHTMLReportes(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-=======
->>>>>>> Stashed changes
         command=lambda:[ventanaReporteEdad.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
 def crearFilasTipoSangreProvincia(tipoSangre, numeroProvincia, donantes):
@@ -1498,11 +1432,7 @@ def lugaresDeDonacion(ventana,donantes,lugares):
     frameLugares = Frame(ventanaLugares,bg="#ffffff")
     frameLugares.pack()
     Label(frameLugares,text="Provincias",bg="#ffffff",font=("Arial",12,"bold")).grid(row=0,column=0,pady=10,padx=10)
-<<<<<<< Updated upstream
     provincia = ttk.Combobox(frameLugares)
-=======
-    provincia = ttk.Combobox(frameLugares,)
->>>>>>> Stashed changes
 
 
 def reportes(ventana,donantes):
