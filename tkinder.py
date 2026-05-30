@@ -840,8 +840,7 @@ def generarPeso():
     Salidas:
     - peso: es la variable que contiene el peso generado para el donante, con un valor entero entre 30 y 300
     """
-    peso = random.randint(30,300)
-    peso = random.randint(50,1200)
+    peso = random.randint(50,120)
     return peso
 
 def generarTelefono():
@@ -868,6 +867,9 @@ def generarCorreo(nombreCompleto):
     numero=random.randint(1,999)
     dominio=random.choice(dominios)
     nombreCompleto = nombreCompleto.replace(" ","")
+    nombreCompleto = nombreCompleto.replace('á','a').replace('é',
+        'e').replace('í','i').replace('ó','o').replace('ú','u').replace('Á',
+        'A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U')
     correo=nombreCompleto.lower()+str(numero)+"@"+dominio
     return correo
 
@@ -973,6 +975,27 @@ def eliminarDonanteAux(donantes, cedulaBuscar, mensaje):
 
 #===============Funciones para Insertar lugar de donacion====================
 
+def insertarLugar(frame, lugares, datos, provincia):
+    formulario = Frame(frame, bg="#cfcfcf")
+    formulario.pack(pady=10)
+    texto_lugares = f"Lugares en {provincia}:\n"
+    for i in datos:
+        texto_lugares += i + "\n"
+    mensaje = Label(formulario, text=texto_lugares, font=("Arial", 11, "bold"), bg="white", fg="#0D1764")
+    mensaje.pack()
+    Label(formulario, text="Ingrese el nuevo Lugar", font=("Arial", 11, "bold"), bg="white", fg="#0D1764").pack(pady=15)
+    nuevoLugar = StringVar()
+    Entry(formulario, textvariable=nuevoLugar).pack(pady=15)
+    frameBotones = Frame(formulario, bg="#ffffff")
+    frameBotones.pack()
+    Button(frameBotones, text="Agregar Lugar", font=("Arial", 11, "bold"), bg="#C62828", fg="white", command=lambda: [lugares[provincia].append(nuevoLugar.get()), formulario.destroy(), insertarLugar(frame, lugares, lugares[provincia], provincia)]).grid(row=0, column=0, padx=10)
+    Button(frameBotones, text="Cancelar", font=("Arial", 11, "bold"), bg="#C62828", fg="white", command=lambda: formulario.destroy()).grid(row=0, column=1, padx=10)
+
+def nuevoLugarDonacion(frame, lugares, provincia):
+    for clave, datos in lugares.items():
+        if provincia == clave:
+            insertarLugar(frame, lugares, datos, provincia)
+        
 
 #==================Funciones para reportes=======================
 
@@ -1042,7 +1065,6 @@ def crearFilaHTML(cedula,datos,color):
     fila=f"""
     <tr style="background-color:{color};">
         <td>{html.escape(str(cedula))}</td>
-        <td>{html.escape(str(datos[1]))}</td>
         <td>{html.escape(str(datos[0]))}</td>
         <td>{html.escape(str(datos[2]))}</td>
         <td>{html.escape(str(datos[3]))}</td>
@@ -1292,6 +1314,31 @@ def reporteCompleto(ventanaReporte,donantes):
     Button(frameFinal,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda: frameFinal.destroy()).pack(pady=10)
 
+def crearFilasMujeresO(donantes):
+    filas = []
+    i = 0
+    for datos in donantes:
+        cedula = datos[1]
+        if datos[4] == False and datos[3] == "O-":
+            if i % 2 == 0:
+                color = "#85a9cc"
+            else:
+                color = "#9C8FE6"
+            filas.append(crearFilaHTML(cedula,datos, color))
+            i += 1
+    return filas
+
+def reporteMujeresO(ventanaReporte,donantes):
+    frameFinal = Frame(ventanaReporte,bg="white")
+    frameFinal.pack(pady=10)
+    Label(frameFinal,text="generar reporte de mujeres donantes O-",bg="white",font=("Arial",12)).pack(pady=10)
+    mensaje = Label(frameFinal,text="",bg="white")
+    mensaje.pack()
+    Button(frameFinal,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:generarHTMLReportes(crearFilasMujeresO(donantes),mensaje)).pack(pady=10)
+    Button(frameFinal,text="Cancelar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:frameFinal.destroy()).pack(pady=10)
+
 def opcionesReportes(opcion,ventanaReporte,donantes):
     """
     Funcionamiento: Esta funcion se encarga de redirigir a la funcion correspondiente para generar el reporte seleccionado por el usuario, a partir de la opcion seleccionada en la ventana de reportes, ademas de mostrar un mensaje con el resultado de la generacion del reporte
@@ -1310,6 +1357,9 @@ def opcionesReportes(opcion,ventanaReporte,donantes):
         reporteTipoSangreProvincia(ventanaReporte,donantes)
     elif opcion == 4:
         reporteCompleto(ventanaReporte,donantes)
+    elif opcion == 5:
+        reporteMujeresO(ventanaReporte,donantes)
+    
 
 #=======Funcion principal=======
 
@@ -1368,7 +1418,8 @@ def generar(ventana,donantes):
     frameBotones= Frame(ventanaGenerar,bg="#ffffff",bd=5)
     frameBotones.pack(pady=5)
     Button(frameBotones,text="generar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:crearDonadores(mensaje,donantes,cantidad.get())).grid(row=0,column=0,padx=5)
-    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:salirInser(ventana,ventanaGenerar)).grid(row=0,column=1,padx=5)
+    Button(frameBotones, text="Limpiar", font=("Arial", 12, "bold"), bg="#555555", fg="white", command=lambda: [cantidad.set(""), mensaje.config(text="")]).grid(row=0, column=1, padx=5)
+    Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#BB3535",fg="white",command=lambda:salirInser(ventana,ventanaGenerar)).grid(row=0,column=2,padx=5)
 
 def actualizarDonador(ventana,donantes,lugaresDonacion):
     """
@@ -1394,6 +1445,7 @@ def actualizarDonador(ventana,donantes,lugaresDonacion):
     mensaje=Label(ventanaBuscarActualizar,text="",bg="#ffffff",font=("Arial",11,"bold"))
     mensaje.pack(pady=10)
     Button(ventanaBuscarActualizar,text="Buscar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",command=lambda:buscarDonanteActualizar(ventana,ventanaBuscarActualizar,donantes,cedulaBuscar,mensaje,lugaresDonacion)).pack(pady=20)
+    Button(ventanaBuscarActualizar, text="Limpiar", font=("Arial", 12, "bold"), bg="#555555", fg="white", command=lambda: [cedulaBuscar.delete(0, 'end') if hasattr(cedulaBuscar, 'delete') else cedulaBuscar.set(""), mensaje.config(text="")]).pack(pady=10)
     Button(ventanaBuscarActualizar,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaBuscarActualizar.destroy(),ventana.deiconify()]).pack(pady=10)
 
 def eliminarDonador(ventana,donantes):
@@ -1423,17 +1475,23 @@ def eliminarDonador(ventana,donantes):
     Button(ventanaEliminar,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaEliminar.destroy(),ventana.deiconify()]
     ).pack(pady=10)
 
-def lugaresDeDonacion(ventana,donantes,lugares):
+def lugaresDeDonacion(ventana,lugares):
     ventana.withdraw()
     ventanaLugares = Toplevel()
     ventanaLugares.title("Lugar de donacion")
     ubicarVentana(ventanaLugares,500,500)
     ventanaLugares.config(bg="#ffffff")
     frameLugares = Frame(ventanaLugares,bg="#ffffff")
-    frameLugares.pack()
+    frameLugares.pack(pady=20)
     Label(frameLugares,text="Provincias",bg="#ffffff",font=("Arial",12,"bold")).grid(row=0,column=0,pady=10,padx=10)
-    provincia = ttk.Combobox(frameLugares)
-
+    provincia = ttk.Combobox(frameLugares, values=list(lugares.keys()), state="readonly")
+    provincia.grid(row=0, column=1, pady=10, padx=10)
+    frameBotones = Frame(ventanaLugares,bg= "#ffffff")
+    frameBotones.pack(pady=20)
+    frameNuevoLugar = Frame(ventanaLugares,bg= "#ffffff")
+    frameNuevoLugar.pack(pady=20)
+    Button(frameBotones,text="Agregar",font=("Arial",12,"bold"),bg="#C62828",fg="white",command=lambda:nuevoLugarDonacion(frameNuevoLugar,lugares,provincia.get())).grid(row=0,column=0,padx=10)
+    Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaLugares.destroy(),ventana.deiconify()]).grid(row=0,column=1,padx=10)
 
 def reportes(ventana,donantes):
     """
@@ -1460,8 +1518,9 @@ def reportes(ventana,donantes):
     opciones.pack(pady=10)
     frameBotones = Frame(ventanaReportes,bg="#ffffff")
     frameBotones.pack()
-    Button(frameBotones,text="Aceptar",bg="#5ab86a",fg="white",command= lambda:opcionesReportes(opcion[opciones.get()],ventanaReportes,donantes)).pack(padx=10)
-    Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaReportes.destroy(),ventana.deiconify()]).pack(pady=10)
+    Button(frameBotones,text="Aceptar",font=("Arial",12,"bold"),bg="#5ab86a",fg="white",command= lambda:opcionesReportes(opcion[opciones.get()],ventanaReportes,donantes)).grid(row = 0,column= 0, padx = 10)
+    Button(frameBotones, text="Limpiar",font=("Arial",12,"bold"),bg="#f44336", fg="white", command=lambda: opciones.set("")).grid(row = 0,column= 1, padx = 10)
+    Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaReportes.destroy(),ventana.deiconify()]).grid(row=0,column= 2, padx = 10)
 
 def salir():
     ventana.destroy()
@@ -1477,7 +1536,7 @@ Button(frameMenu,text="4. Eliminar donador",font=("Arial",14),
     width=30,height=2,bg="#1565c0",fg="white",
     command=lambda:eliminarDonador(ventana,donantes)).grid(row=2,column=1)
 Button(frameMenu,text="5. Insertar lugar",font=("Arial",14),
-    width=30,height=2,bg="#1565c0",fg="white",command=lambda:lugaresDeDonacion(ventana,donantes,lugaresDonacion)).grid(row=3,column=0)
+    width=30,height=2,bg="#1565c0",fg="white",command=lambda:lugaresDeDonacion(ventana,lugaresDonacion)).grid(row=3,column=0)
 Button(frameMenu,text="6. Reportes",font=("Arial",14),width=30,
     height=2,bg="#1565c0",fg="white",command=lambda:reportes(ventana,donantes)).grid(row=3,column=1)
 Button(frameMenu,text="7. Salir",font=("Arial",14),width=30,
