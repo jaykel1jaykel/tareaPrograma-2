@@ -809,7 +809,6 @@ def generarFecha():
     Salidas:
     - fecha: es la variable que contiene la fecha de nacimiento generada para el donante, con el formato "dd/mm/aaaa"
     """
-    anno=random.randint(1950,2025)
     anno=random.randint(1961,2008)
     mes=random.randint(1,12)
     if mes in [1,3,5,7,8,10,12]:
@@ -1129,9 +1128,6 @@ def reportePorProvincia(ventanaReporte,donantes):
     frameBotones.pack()
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:generarHTMLReportes(crearFilasProvincia(provincias[opcion.get()],donantes),mensaje)).grid(row=0,column=0,padx=5)
-    Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(
-        crearFilasProvincia(provincias[opcion.get()],donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaReporteProvincia.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
@@ -1339,6 +1335,97 @@ def reporteMujeresO(ventanaReporte,donantes):
     Button(frameFinal,text="Cancelar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:frameFinal.destroy()).pack(pady=10)
 
+def crearFilaHTMLDonacion(cedula,datos,color):
+    fila=f"""
+    <tr style="background-color:{color};">
+        <td>{html.escape(str(cedula))}</td>
+        <td>{html.escape(str(datos[0]))}</td>
+        <td>{html.escape(str(datos[3]))}</td>
+        <td>{html.escape(str(datos[6]))}</td>
+        <td>{html.escape(str(datos[7]))}</td>
+    </tr>
+    """
+    return fila
+
+def crearFilasDonacion(tipoSangre,donantes):
+    filas=[]
+    contador=0
+    compatibilidad={"O-":["O-","O+","A-","A+","B-","B+","AB-","AB+"],
+        "O+":["O+","A+","B+","AB+"],
+        "A-":["A-","A+","AB-","AB+"],
+        "A+":["A+","AB+"],
+        "B-":["B-","B+","AB-","AB+"],
+        "B+":["B+","AB+"],
+        "AB-":["AB-","AB+"],
+        "AB+":["AB+"]}
+    for provincia in range(1,8):
+        for datos in donantes:
+            provinciaDonante=int(datos[1].split("-")[0])
+            if provinciaDonante==provincia and datos[3] in compatibilidad[tipoSangre]:
+                if contador % 2 == 0:
+                    color="#85a9cc"
+                else:
+                    color="#9C8FE6"
+                filas.append(crearFilaHTMLDonacion(datos[1],datos,color))
+                contador+=1
+    return filas
+
+def generarHTMLDonacion(filasHTML,mensaje):
+    inicio=datetime.now()
+    ahora=datetime.now()
+    nombreArchivo="reporteDonacion"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
+    try:
+        with open(nombreArchivo,"w",encoding="utf-8") as archivo:
+            archivo.write("<!DOCTYPE html>\n")
+            archivo.write("<html lang='es'>\n")
+            archivo.write("<head>\n")
+            archivo.write("<meta charset='UTF-8'>\n")
+            archivo.write("<title>Reporte Donacion</title>\n")
+            archivo.write("</head>\n")
+            archivo.write("<body style='font-family: Arial, sans-serif;'>\n")
+            archivo.write("<h1>¿A quién puede donar?</h1>\n")
+            archivo.write(f"<h2>Generado el {ahora.strftime('%d/%m/%y %H:%M:%S')}</h2>\n")
+            final=datetime.now()
+            duracion=final-inicio
+            archivo.write(f"<p><strong>Duración total:</strong> {duracion}</p>\n")
+            archivo.write("<table border='1' style='border-collapse:collapse; text-align:center; width:100%;'>\n")
+            archivo.write("<tr style='background-color:#cccccc;'>\n")
+            archivo.write("<th>Cedula</th>\n")
+            archivo.write("<th>Nombre completo</th>\n")
+            archivo.write("<th>Tipo de sangre</th>\n")
+            archivo.write("<th>Telefono</th>\n")
+            archivo.write("<th>Correo</th>\n")
+            archivo.write("</tr>\n")
+            for fila in filasHTML:
+                archivo.write(fila)
+            archivo.write("</table>\n")
+            archivo.write("</body>\n")
+            archivo.write("</html>\n")
+        mensaje.config(text="Reporte creado satisfactoriamente",fg="green")
+    except:
+        mensaje.config(text="Reporte no creado",fg="red")
+
+def reporteDonacion(ventanaReporte,donantes):
+    ventanaReporte.withdraw()
+    ventanaDonacion=Toplevel()
+    ventanaDonacion.title("¿A quién puede donar?")
+    ubicarVentana(ventanaDonacion,700,600)
+    ventanaDonacion.config(bg="#ffffff")
+    frameReporte=Frame(ventanaDonacion,bg="#ffffff")
+    frameReporte.pack(pady=20)
+    Label(frameReporte,text="Seleccione el tipo de sangre",bg="#ffffff").grid(row=0,column=0,pady=10)
+    tiposSangre=["O+","O-","A+","A-","B+","B-","AB+","AB-"]
+    opcionSangre=ttk.Combobox(frameReporte,values=tiposSangre)
+    opcionSangre.grid(row=0,column=1,pady=10)
+    mensaje=Label(frameReporte,text="",bg="#ffffff")
+    mensaje.grid(row=1,column=0,columnspan=2,pady=10)
+    frameBotones=Frame(ventanaDonacion,bg="#ffffff")
+    frameBotones.pack(pady=20)
+    Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:generarHTMLDonacion(crearFilasDonacion(opcionSangre.get(),donantes),mensaje)).grid(row=0,column=0,padx=5)
+    Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda:[ventanaDonacion.destroy(), ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
+
 def opcionesReportes(opcion,ventanaReporte,donantes):
     """
     Funcionamiento: Esta funcion se encarga de redirigir a la funcion correspondiente para generar el reporte seleccionado por el usuario, a partir de la opcion seleccionada en la ventana de reportes, ademas de mostrar un mensaje con el resultado de la generacion del reporte
@@ -1359,6 +1446,8 @@ def opcionesReportes(opcion,ventanaReporte,donantes):
         reporteCompleto(ventanaReporte,donantes)
     elif opcion == 5:
         reporteMujeresO(ventanaReporte,donantes)
+    elif opcion == 6:
+        reporteDonacion(ventanaReporte,donantes)
     
 
 #=======Funcion principal=======
@@ -1511,9 +1600,9 @@ def reportes(ventana,donantes):
     ventanaReportes.config(bg="#ffffff")
     frameReporte= Frame(ventanaReportes,bg="#ffffff")
     frameReporte.pack()
-    Label(frameReporte,text="INgrese la opcion de reporte:").pack(pady=10)
+    Label(frameReporte,text="Ingrese la opcion de reporte:").pack(pady=10)
     opcion = {"Donantes por provincia":1,"Rango de edad":2,"Tipo de sangre por provincia":3,
-            "Lista completa de donadores":4,"Mujeres donantes O-":5,"A quien puede donar":6,"De quien puede resivir":7,"Donantes no activos":8}
+            "Lista completa de donadores":4,"Mujeres donantes O-":5,"A quien puede donar":6,"De quien puede recibir":7,"Donantes no activos":8}
     opciones=ttk.Combobox(frameReporte,textvariable=opcion,values=list(opcion.keys()))
     opciones.pack(pady=10)
     frameBotones = Frame(ventanaReportes,bg="#ffffff")
