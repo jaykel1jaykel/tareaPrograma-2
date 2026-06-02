@@ -1311,6 +1311,13 @@ def reporteCompleto(ventanaReporte,donantes):
         command=lambda: frameFinal.destroy()).pack(pady=10)
 
 def crearFilasMujeresO(donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para las mujeres donantes con tipo de sangre O-, a partir de sus datos, ademas de retornar la lista de filas HTML generadas para cada una de ellas
+    Entradas:
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para filtrar las mujeres donantes con tipo de sangre O- y generar las filas HTML correspondientes para cada una de ellas
+    Salidas:
+    - filas: es la variable que contiene la lista de filas en formato HTML generadas para las mujeres donantes con tipo de sangre O-, que se utilizara para construir el contenido del reporte correspondiente, si no se encontraron mujeres donantes con tipo de sangre O- se retorna una lista vacia
+    """
     filas = []
     i = 0
     for datos in donantes:
@@ -1325,6 +1332,15 @@ def crearFilasMujeresO(donantes):
     return filas
 
 def reporteMujeresO(ventanaReporte,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una seccion para generar un reporte de mujeres donantes con tipo de sangre O-, ademas de permitir al usuario generar el reporte en formato HTML y mostrar un mensaje con el resultado de la generacion
+    Entradas:
+    - ventanaReporte: es la variable que contiene la ventana principal de reportes, donde se mostrara la seccion para generar el reporte de mujeres donantes con tipo de sangre O-
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para generar el reporte de mujeres donantes con tipo de sangre O-
+    Salidas:
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte, si el reporte fue generado correctamente se muestra un mensaje indicando que fue creado satisfactoriamente, si hubo un error se muestra un mensaje indicando que el reporte no pudo ser creado
+    - reporte HTML: se genera un archivo HTML con la informacion de las mujeres donantes con tipo de sangre O-, si el reporte fue generado correctamente
+    """
     frameFinal = Frame(ventanaReporte,bg="white")
     frameFinal.pack(pady=10)
     Label(frameFinal,text="generar reporte de mujeres donantes O-",bg="white",font=("Arial",12)).pack(pady=10)
@@ -1336,6 +1352,15 @@ def reporteMujeresO(ventanaReporte,donantes):
         command=lambda:frameFinal.destroy()).pack(pady=10)
 
 def crearFilaHTMLDonacion(cedula,datos,color):
+    """
+    Funcionamiento: Esta funcion se encarga de construir una fila en formato HTML con los datos de un donante para los reportes de compatibilidad sanguinea, ademas de retornar la fila HTML generada
+    Entradas:
+    - cedula: es la variable que contiene la cedula del donante, que se mostrara en la fila HTML generada
+    - datos: es la variable que contiene los datos del donante, que se utilizaran para completar la informacion de la fila HTML generada
+    - color: es la variable que contiene el color de fondo que tendra la fila HTML generada
+    Salidas:
+    - fila: es la variable que contiene la fila en formato HTML construida con los datos del donante y el color recibido
+    """
     fila=f"""
     <tr style="background-color:{color};">
         <td>{html.escape(str(cedula))}</td>
@@ -1348,6 +1373,14 @@ def crearFilaHTMLDonacion(cedula,datos,color):
     return fila
 
 def crearFilasDonacion(tipoSangre,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para los donantes compatibles con el tipo de sangre seleccionado, ademas de ordenar los resultados por provincia de forma ascendente
+    Entradas:
+    - tipoSangre: es la variable que contiene el tipo de sangre seleccionado por el usuario, que se utilizara para determinar los tipos de sangre compatibles para donar
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para filtrar los donantes compatibles y generar las filas HTML correspondientes
+    Salidas:
+    - filas: es la variable que contiene la lista de filas en formato HTML generadas para los donantes compatibles con el tipo de sangre seleccionado, que se utilizara para construir el reporte correspondiente
+    """
     filas=[]
     contador=0
     compatibilidad={"O-":["O-","O+","A-","A+","B-","B+","AB-","AB+"],
@@ -1371,6 +1404,15 @@ def crearFilasDonacion(tipoSangre,donantes):
     return filas
 
 def generarHTMLDonacion(filasHTML,mensaje):
+    """
+    Funcionamiento: Esta funcion se encarga de generar un reporte en formato HTML para mostrar los donantes compatibles con un tipo de sangre seleccionado, ademas de mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - filasHTML: es la variable que contiene la lista de filas HTML generadas para los donantes compatibles, que se utilizara para construir el contenido del reporte
+    - mensaje: es la variable que contiene el mensaje donde se mostrara el resultado de la generacion del reporte
+    Salidas:
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte, si el reporte fue generado correctamente se muestra un mensaje indicando que fue creado satisfactoriamente, si hubo un error se muestra un mensaje indicando que el reporte no fue creado
+    - reporte HTML: se genera un archivo HTML con el contenido del reporte de compatibilidad sanguinea, si el proceso fue realizado correctamente
+    """
     inicio=datetime.now()
     ahora=datetime.now()
     nombreArchivo="reporteDonacion"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
@@ -1406,6 +1448,16 @@ def generarHTMLDonacion(filasHTML,mensaje):
         mensaje.config(text="Reporte no creado",fg="red")
 
 def reporteDonacion(ventanaReporte,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario seleccione un tipo de sangre y genere un reporte de los donantes a quienes puede donar, ademas de mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - ventanaReporte: es la variable que contiene la ventana principal de reportes, que se ocultara para mostrar la ventana de compatibilidad sanguinea y se mostrara nuevamente al regresar
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para generar el reporte de compatibilidad sanguinea correspondiente al tipo de sangre seleccionado
+    Salidas:
+    - ventanaReporte: se oculta mientras se muestra la ventana de compatibilidad sanguinea y se vuelve a mostrar cuando el usuario regresa
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte
+    - reporte HTML: se genera un archivo HTML con los donantes compatibles para donar segun el tipo de sangre seleccionado
+    """
     ventanaReporte.withdraw()
     ventanaDonacion=Toplevel()
     ventanaDonacion.title("¿A quién puede donar?")
@@ -1427,6 +1479,14 @@ def reporteDonacion(ventanaReporte,donantes):
         command=lambda:[ventanaDonacion.destroy(), ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
 def crearFilasRecibir(tipoSangre,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para los donantes de los cuales puede recibir sangre el tipo de sangre seleccionado, ademas de ordenar los resultados por provincia de forma descendente
+    Entradas:
+    - tipoSangre: es la variable que contiene el tipo de sangre seleccionado por el usuario, que se utilizara para determinar de cuales tipos de sangre puede recibir
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para filtrar los donantes compatibles y generar las filas HTML correspondientes
+    Salidas:
+    - filas: es la variable que contiene la lista de filas en formato HTML generadas para los donantes compatibles con el tipo de sangre seleccionado para recibir sangre, que se utilizara para construir el reporte correspondiente
+    """
     filas=[]
     contador=0
     compatibilidad={
@@ -1453,6 +1513,16 @@ def crearFilasRecibir(tipoSangre,donantes):
     return filas
 
 def reporteRecibir(ventanaReporte,donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario seleccione un tipo de sangre y genere un reporte de los donantes de los cuales puede recibir sangre, ademas de mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - ventanaReporte: es la variable que contiene la ventana principal de reportes, que se ocultara para mostrar la ventana de compatibilidad sanguinea y se mostrara nuevamente al regresar
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para generar el reporte de compatibilidad sanguinea correspondiente al tipo de sangre seleccionado
+    Salidas:
+    - ventanaReporte: se oculta mientras se muestra la ventana de compatibilidad sanguinea y se vuelve a mostrar cuando el usuario regresa
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte
+    - reporte HTML: se genera un archivo HTML con los donantes compatibles para recibir sangre segun el tipo de sangre seleccionado
+    """
     ventanaReporte.withdraw()
     ventanaRecibir=Toplevel()
     ventanaRecibir.title("¿De quien puede recibir?")
@@ -1472,6 +1542,81 @@ def reporteRecibir(ventanaReporte,donantes):
         command=lambda:generarHTMLDonacion(crearFilasRecibir(opcionSangre.get(),donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaRecibir.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
+
+def crearFilaHTMLInactivo(cedula, datos, color):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una fila en formato HTML para un donante inhabilitado, utilizando la informacion almacenada en la lista de datos del donante, ademas de retornar la fila HTML generada para ser utilizada dentro del reporte de donantes inactivos
+    Entradas:
+    - cedula: es la variable que contiene la cedula del donante, que se utilizara para mostrar la identificacion correspondiente dentro de la fila HTML
+    - datos: es la variable que contiene la informacion completa del donante, que se utilizara para obtener y mostrar los datos dentro de la fila HTML
+    - color: es la variable que contiene el color de fondo que tendra la fila HTML, que se utilizara para alternar los colores 
+    Salidas:
+    - fila: es la variable que contiene la fila en formato HTML generada con la informacion del donante inhabilitado, que se utilizara posteriormente para construir el reporte HTML
+    """
+    sexo = "Masculino" if datos[4] else "Femenino"
+    justificaciones = {
+        0: "Sin justificacion",
+        1: "Enfermedades Infecciosas/Crónicas",
+        2: "Conductas de Riesgo",
+        3: "Factores de Salud Física",
+        4: "Procedimientos Médicos",
+        5: "Uso de Medicamentos",
+        6: "Estilo de Vida y Viajes",
+        7: "Situaciones Específicas"}
+    fila = f"""
+    <tr style="background-color:{color};">
+        <td>{html.escape(str(cedula))}</td>
+        <td>{html.escape(str(datos[0]))}</td>
+        <td>{html.escape(str(datos[2]))}</td>
+        <td>{html.escape(str(datos[3]))}</td>
+        <td>{html.escape(sexo)}</td>
+        <td>{html.escape(str(datos[5]))}</td>
+        <td>{html.escape(str(datos[6]))}</td>
+        <td>{html.escape(str(datos[7]))}</td>
+        <td>{html.escape(justificaciones.get(datos[-1], "Desconocida"))}</td>
+    </tr>
+    """
+    return fila
+
+def crearFilasInactivos(donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para todos los donantes que se encuentran inhabilitados, a partir de los datos almacenados en la lista de donantes, ademas de retornar la lista de filas HTML generadas para construir el reporte de donantes inactivos
+    Entradas:
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para verificar cuales donantes se encuentran inhabilitados y generar las filas HTML correspondientes para cada uno de ellos
+    Salidas:
+    - filas: es la variable que contiene la lista de filas en formato HTML generadas para todos los donantes inhabilitados, que se utilizara para construir el contenido del reporte HTML de donantes inactivos, si no existen donantes inhabilitados se retorna una lista vacia
+    """
+    filas = []
+    contador = 0
+    for datos in donantes:
+        if datos[-2] == 0:
+            if contador % 2 == 0:
+                color = "#85a9cc"
+            else:
+                color = "#9C8FE6"
+            filas.append(crearFilaHTMLInactivo(datos[1],datos,color))
+            contador += 1
+    return filas
+
+def reporteInactivos(ventanaReporte, donantes):
+    """
+    Funcionamiento: Esta funcion se encarga de mostrar una ventana para que el usuario genere el reporte de donantes inhabilitados, ademas de permitir la generacion del reporte HTML correspondiente y mostrar un mensaje con el resultado de la generacion del reporte
+    Entradas:
+    - ventanaReporte: es la variable que contiene la ventana principal de reportes, que se utilizara para mostrar la interfaz correspondiente al reporte de donantes inhabilitados
+    - donantes: es la variable que contiene la lista de donantes, que se utilizara para identificar los donantes inhabilitados y generar el reporte HTML correspondiente
+    Salidas:
+    - mensaje: es un mensaje que indica el resultado de la generacion del reporte, si el reporte fue generado correctamente se muestra un mensaje indicando que el reporte fue generado correctamente, si hubo un error al generar el reporte se muestra un mensaje indicando que hubo un error al generar el reporte
+    - reporte HTML: se genera un archivo HTML con el contenido del reporte de donantes inhabilitados construido a partir de las filas HTML generadas para cada donante inhabilitado, si el reporte fue generado correctamente, si hubo un error al generar el reporte no se genera el archivo HTML
+    """
+    frameFinal = Frame(ventanaReporte, bg="white")
+    frameFinal.pack(pady=10)
+    Label(frameFinal,text="Generar reporte de donantes inactivos",bg="white",font=("Arial",12)).pack(pady=10)
+    mensaje = Label(frameFinal, text="", bg="white")
+    mensaje.pack()
+    Button(frameFinal,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda: generarHTMLReportes(crearFilasInactivos(donantes),mensaje)).pack(pady=10)
+    Button(frameFinal,text="Cancelar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
+        command=lambda: frameFinal.destroy()).pack(pady=10)
 
 def opcionesReportes(opcion,ventanaReporte,donantes):
     """
@@ -1497,6 +1642,8 @@ def opcionesReportes(opcion,ventanaReporte,donantes):
         reporteDonacion(ventanaReporte,donantes)
     elif opcion == 7:
         reporteRecibir(ventanaReporte,donantes)
+    elif opcion == 8:
+        reporteInactivos(ventanaReporte, donantes)
     
 
 #=======Funcion principal=======
