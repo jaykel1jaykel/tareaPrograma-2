@@ -501,6 +501,7 @@ def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,tel
     donantes.append([resultadoNombre[1],
     cedula,resultadoFecha[1],tipoSangre,sexo,
     resultadoPeso[1],telefono,correo,1,0])
+    actualizarEstadoBotones()
     return(True,"Donante registrado correctamente")
 
 def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,
@@ -524,6 +525,7 @@ def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre
     """
     resultado=validarDatos(donantes,cedula.get(),nombre.get(),fechaNacimiento.get(),tipoSangre.get(),
         sexo.get(),peso.get(),telefono.get(),correo.get())
+    guardarDatos(donantes)
     if resultado[0]==False:
         mensaje.config(text=resultado[1],fg="red")
         return
@@ -918,6 +920,7 @@ def crearDonadores(mensaje,donantes,cantidad):
                     generarTelefono(),generarCorreo(nombre),1,0])
                 contador+=1
             guardarDatos(donantes)
+            actualizarEstadoBotones()
             mensaje.config(text="Donadores generados correctamente",fg="green")
             mensaje.pack()
     else:
@@ -1076,6 +1079,43 @@ def generarHTMLReportes(filasHTML,mensaje):
     except:
         print("ERROR")
 
+
+def generarHTMLCorta(filasHTML,mensaje):
+    inicio=datetime.now()
+    ahora=datetime.now()
+    nombreArchivo="reporteDonant"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
+    try:
+        with open(nombreArchivo,"w",encoding="utf-8") as archivo:
+            archivo.write("<!DOCTYPE html>\n")
+            archivo.write("<html lang='es'>\n")
+            archivo.write("<head>\n")
+            archivo.write("<meta charset='UTF-8'>\n")
+            archivo.write("<title>Reporte Mujeres O-</title>\n")
+            archivo.write("</head>\n")
+            archivo.write("<body style='font-family: Arial, sans-serif;'>\n")
+            archivo.write("<h1>Reporte Mujeres Donantes O-</h1>\n")
+            archivo.write(f"<h2>Generado el {ahora.strftime('%d/%m/%y %H:%M:%S')}</h2>\n")
+            final=datetime.now()
+            duracion=final-inicio
+            archivo.write(f"<p><strong>Duración total:</strong> {duracion}</p>\n")
+            archivo.write(f"<p><strong>Cantidad total de donantes:</strong> {len(filasHTML)}</p>\n")
+            archivo.write("<table border='1' style='border-collapse:collapse; text-align:center; width:100%;'>\n")
+            archivo.write("<tr style='background-color:#cccccc;'>\n")
+            archivo.write("<th>Cedula</th>\n")
+            archivo.write("<th>Nombre</th>\n")
+            archivo.write("<th>Fecha nacimiento</th>\n")
+            archivo.write("<th>Telefono</th>\n")
+            archivo.write("<th>Correo</th>\n")
+            archivo.write("</tr>\n")
+            for fila in filasHTML:
+                archivo.write(fila)
+            archivo.write("</table>\n")
+            archivo.write("</body>\n")
+            archivo.write("</html>\n")
+        mensaje.config(text="Reporte generado correctamente",fg="green")
+    except:
+        mensaje.config(text="Error al generar el reporte",fg="red")
+
 def crearFilaHTML(cedula,datos,color):
     """
     Funcionamiento: Esta funcion se encarga de crear una fila en formato HTML para un donante a partir de sus datos, ademas de retornar la fila HTML generada
@@ -1105,6 +1145,18 @@ def crearFilaHTML(cedula,datos,color):
     """
     return fila
 
+def crearFilaHTMLCorta(datos,color):
+    fila=f"""
+    <tr style="background-color:{color};">
+        <td>{html.escape(str(datos[1]))}</td>
+        <td>{html.escape(str(datos[0]))}</td>
+        <td>{html.escape(str(datos[2]))}</td>
+        <td>{html.escape(str(datos[6]))}</td>
+        <td>{html.escape(str(datos[7]))}</td>
+    </tr>
+    """
+    return fila
+
 def crearFilasProvincia(numeroProvincia, donantes):
     """
     Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para los donantes que pertenecen a una provincia especifica, a partir de sus datos, ademas de retornar la lista de filas HTML generadas
@@ -1124,7 +1176,7 @@ def crearFilasProvincia(numeroProvincia, donantes):
                 color = "#85a9cc"
             else:
                 color = "#9C8FE6"
-            filas.append(crearFilaHTML(cedula, datos, color))
+            filas.append(crearFilaHTMLCorta(datos, color))
             i += 1
     return filas
 
@@ -1156,7 +1208,7 @@ def reportePorProvincia(ventanaReporte,donantes):
     frameBotones = Frame(ventanaReporteProvincia,bg="#ffffff")
     frameBotones.pack()
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(crearFilasProvincia(provincias[opcion.get()],donantes),mensaje)).grid(row=0,column=0,padx=5)
+        command=lambda:generarHTMLCorta(crearFilasProvincia(provincias[opcion.get()],donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaReporteProvincia.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
@@ -1184,7 +1236,7 @@ def crearFilasEdad(edadInicial, edadFinal, donantes):
                 color = "#85a9cc"
             else:
                 color = "#9C8FE6"
-            filas.append(crearFilaHTML(cedula, datos, color))
+            filas.append(crearFilaHTMLCorta(datos, color))
             i += 1
     return filas
 
@@ -1219,12 +1271,12 @@ def reportePorEdad(ventanaReporte,donantes):
     frameBotones.pack(pady=20)
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),
         bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),
+        command=lambda:generarHTMLCorta(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),
                 donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),donantes),mensaje)).grid(row=0,column=0,padx=5)
+        command=lambda:generarHTMLCorta(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda: generarHTMLReportes(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),donantes),mensaje)).grid(row=0,column=0,padx=5)
+        command=lambda: generarHTMLCorta(crearFilasEdad(int(edadInicial.get()),int(edadFinal.get()),donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Salir",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaReporteEdad.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
@@ -1248,7 +1300,7 @@ def crearFilasTipoSangreProvincia(tipoSangre, numeroProvincia, donantes):
                 color = "#85a9cc"
             else:
                 color = "#9C8FE6"
-            filas.append(crearFilaHTML(cedula, datos, color))
+            filas.append(crearFilaHTMLCorta(datos, color))
             i += 1
     return filas
 
@@ -1292,7 +1344,7 @@ def reporteTipoSangreProvincia(ventanaReporte,donantes):
     frameBotones=Frame(ventanaReporteSangre,bg="#ffffff")
     frameBotones.pack(pady=20)
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLReportes(crearFilasTipoSangreProvincia(opcionSangre.get(),provincias[opcionProvincia.get()],donantes),mensaje)
+        command=lambda:generarHTMLCorta(crearFilasTipoSangreProvincia(opcionSangre.get(),provincias[opcionProvincia.get()],donantes),mensaje)
     ).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaReporteSangre.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
@@ -1339,18 +1391,6 @@ def reporteCompleto(ventanaReporte,donantes):
     Button(frameFinal,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda: frameFinal.destroy()).pack(pady=10)
 
-def crearFilaHTMLMujeresO(datos,color):
-    fila=f"""
-    <tr style="background-color:{color};">
-        <td>{html.escape(str(datos[1]))}</td>
-        <td>{html.escape(str(datos[0]))}</td>
-        <td>{html.escape(str(datos[2]))}</td>
-        <td>{html.escape(str(datos[6]))}</td>
-        <td>{html.escape(str(datos[7]))}</td>
-    </tr>
-    """
-    return fila
-
 def crearFilasMujeresO(donantes):
     """
     Funcionamiento: Esta funcion se encarga de crear una lista de filas en formato HTML para las mujeres donantes con tipo de sangre O-, a partir de sus datos, ademas de retornar la lista de filas HTML generadas para cada una de ellas
@@ -1368,45 +1408,9 @@ def crearFilasMujeresO(donantes):
                 color = "#85a9cc"
             else:
                 color = "#9C8FE6"
-            filas.append(crearFilaHTMLMujeresO(cedula,datos, color))
+            filas.append(crearFilaHTMLCorta(datos, color))
             i += 1
     return filas
-
-def generarHTMLMujeresO(filasHTML,mensaje):
-    inicio=datetime.now()
-    ahora=datetime.now()
-    nombreArchivo="reporteMujeresO-"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
-    try:
-        with open(nombreArchivo,"w",encoding="utf-8") as archivo:
-            archivo.write("<!DOCTYPE html>\n")
-            archivo.write("<html lang='es'>\n")
-            archivo.write("<head>\n")
-            archivo.write("<meta charset='UTF-8'>\n")
-            archivo.write("<title>Reporte Mujeres O-</title>\n")
-            archivo.write("</head>\n")
-            archivo.write("<body style='font-family: Arial, sans-serif;'>\n")
-            archivo.write("<h1>Reporte Mujeres Donantes O-</h1>\n")
-            archivo.write(f"<h2>Generado el {ahora.strftime('%d/%m/%y %H:%M:%S')}</h2>\n")
-            final=datetime.now()
-            duracion=final-inicio
-            archivo.write(f"<p><strong>Duración total:</strong> {duracion}</p>\n")
-            archivo.write(f"<p><strong>Cantidad total de donantes:</strong> {len(filasHTML)}</p>\n")
-            archivo.write("<table border='1' style='border-collapse:collapse; text-align:center; width:100%;'>\n")
-            archivo.write("<tr style='background-color:#cccccc;'>\n")
-            archivo.write("<th>Cedula</th>\n")
-            archivo.write("<th>Nombre</th>\n")
-            archivo.write("<th>Fecha nacimiento</th>\n")
-            archivo.write("<th>Telefono</th>\n")
-            archivo.write("<th>Correo</th>\n")
-            archivo.write("</tr>\n")
-            for fila in filasHTML:
-                archivo.write(fila)
-            archivo.write("</table>\n")
-            archivo.write("</body>\n")
-            archivo.write("</html>\n")
-        mensaje.config(text="Reporte generado correctamente",fg="green")
-    except:
-        mensaje.config(text="Error al generar el reporte",fg="red")
 
 def reporteMujeresO(ventanaReporte,donantes):
     """
@@ -1424,30 +1428,9 @@ def reporteMujeresO(ventanaReporte,donantes):
     mensaje = Label(frameFinal,text="",bg="white")
     mensaje.pack()
     Button(frameFinal,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLMujeresO(crearFilasMujeresO(donantes),mensaje)).pack(pady=10)
+        command=lambda:generarHTMLCorta(crearFilasMujeresO(donantes),mensaje)).pack(pady=10)
     Button(frameFinal,text="Cancelar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:frameFinal.destroy()).pack(pady=10)
-
-def crearFilaHTMLDonacion(cedula,datos,color):
-    """
-    Funcionamiento: Esta funcion se encarga de construir una fila en formato HTML con los datos de un donante para los reportes de compatibilidad sanguinea, ademas de retornar la fila HTML generada
-    Entradas:
-    - cedula: es la variable que contiene la cedula del donante, que se mostrara en la fila HTML generada
-    - datos: es la variable que contiene los datos del donante, que se utilizaran para completar la informacion de la fila HTML generada
-    - color: es la variable que contiene el color de fondo que tendra la fila HTML generada
-    Salidas:
-    - fila: es la variable que contiene la fila en formato HTML construida con los datos del donante y el color recibido
-    """
-    fila=f"""
-    <tr style="background-color:{color};">
-        <td>{html.escape(str(cedula))}</td>
-        <td>{html.escape(str(datos[0]))}</td>
-        <td>{html.escape(str(datos[3]))}</td>
-        <td>{html.escape(str(datos[6]))}</td>
-        <td>{html.escape(str(datos[7]))}</td>
-    </tr>
-    """
-    return fila
 
 def crearFilasDonacion(tipoSangre,donantes):
     """
@@ -1476,53 +1459,9 @@ def crearFilasDonacion(tipoSangre,donantes):
                     color="#85a9cc"
                 else:
                     color="#9C8FE6"
-                filas.append(crearFilaHTMLDonacion(datos[1],datos,color))
+                filas.append(crearFilaHTMLCorta(datos,color))
                 contador+=1
     return filas
-
-def generarHTMLDonacion(filasHTML,mensaje):
-    """
-    Funcionamiento: Esta funcion se encarga de generar un reporte en formato HTML para mostrar los donantes compatibles con un tipo de sangre seleccionado, ademas de mostrar un mensaje con el resultado de la generacion del reporte
-    Entradas:
-    - filasHTML: es la variable que contiene la lista de filas HTML generadas para los donantes compatibles, que se utilizara para construir el contenido del reporte
-    - mensaje: es la variable que contiene el mensaje donde se mostrara el resultado de la generacion del reporte
-    Salidas:
-    - mensaje: es un mensaje que indica el resultado de la generacion del reporte, si el reporte fue generado correctamente se muestra un mensaje indicando que fue creado satisfactoriamente, si hubo un error se muestra un mensaje indicando que el reporte no fue creado
-    - reporte HTML: se genera un archivo HTML con el contenido del reporte de compatibilidad sanguinea, si el proceso fue realizado correctamente
-    """
-    inicio=datetime.now()
-    ahora=datetime.now()
-    nombreArchivo="reporteDonacion"+ahora.strftime("%d-%m-%H-%M-%S")+".html"
-    try:
-        with open(nombreArchivo,"w",encoding="utf-8") as archivo:
-            archivo.write("<!DOCTYPE html>\n")
-            archivo.write("<html lang='es'>\n")
-            archivo.write("<head>\n")
-            archivo.write("<meta charset='UTF-8'>\n")
-            archivo.write("<title>Reporte Donacion</title>\n")
-            archivo.write("</head>\n")
-            archivo.write("<body style='font-family: Arial, sans-serif;'>\n")
-            archivo.write("<h1>Reporte de compatibilidad sanguínea</h1>\n")
-            archivo.write(f"<h2>Generado el {ahora.strftime('%d/%m/%y %H:%M:%S')}</h2>\n")
-            final=datetime.now()
-            duracion=final-inicio
-            archivo.write(f"<p><strong>Duración total:</strong> {duracion}</p>\n")
-            archivo.write("<table border='1' style='border-collapse:collapse; text-align:center; width:100%;'>\n")
-            archivo.write("<tr style='background-color:#cccccc;'>\n")
-            archivo.write("<th>Cedula</th>\n")
-            archivo.write("<th>Nombre completo</th>\n")
-            archivo.write("<th>Tipo de sangre</th>\n")
-            archivo.write("<th>Telefono</th>\n")
-            archivo.write("<th>Correo</th>\n")
-            archivo.write("</tr>\n")
-            for fila in filasHTML:
-                archivo.write(fila)
-            archivo.write("</table>\n")
-            archivo.write("</body>\n")
-            archivo.write("</html>\n")
-        mensaje.config(text="Reporte creado satisfactoriamente",fg="green")
-    except:
-        mensaje.config(text="Reporte no creado",fg="red")
 
 def reporteDonacion(ventanaReporte,donantes):
     """
@@ -1551,7 +1490,7 @@ def reporteDonacion(ventanaReporte,donantes):
     frameBotones=Frame(ventanaDonacion,bg="#ffffff")
     frameBotones.pack(pady=20)
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLDonacion(crearFilasDonacion(opcionSangre.get(),donantes),mensaje)).grid(row=0,column=0,padx=5)
+        command=lambda:generarHTMLCorta(crearFilasDonacion(opcionSangre.get(),donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaDonacion.destroy(), ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
@@ -1584,7 +1523,7 @@ def crearFilasRecibir(tipoSangre,donantes):
                 else:
                     color="#9C8FE6"
                 filas.append(
-                    crearFilaHTMLDonacion(datos[1],datos,color)
+                    crearFilaHTMLCorta(datos,color)
                 )
                 contador += 1
     return filas
@@ -1616,7 +1555,7 @@ def reporteRecibir(ventanaReporte,donantes):
     frameBotones=Frame(ventanaRecibir,bg="#ffffff")
     frameBotones.pack(pady=20)
     Button(frameBotones,text="Generar reporte",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
-        command=lambda:generarHTMLDonacion(crearFilasRecibir(opcionSangre.get(),donantes),mensaje)).grid(row=0,column=0,padx=5)
+        command=lambda:generarHTMLCorta(crearFilasRecibir(opcionSangre.get(),donantes),mensaje)).grid(row=0,column=0,padx=5)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#4773C3",fg="white",
         command=lambda:[ventanaRecibir.destroy(),ventanaReporte.deiconify()]).grid(row=0,column=1,padx=5)
 
@@ -1926,11 +1865,13 @@ btnSalir = Button(frameMenu, text="7. Salir", font=("Arial", 14),
 btnSalir.grid(row=4, column=0, columnspan=2)
 
 def actualizarEstadoBotones():
-    estado = NORMAL if len(donantes) > 0 else DISABLED
+    if len(donantes) > 0:
+        estado = NORMAL
+    else:
+        estado = DISABLED
     btnActualizar.config(state=estado)
     btnEliminar.config(state=estado)
     btnReportes.config(state=estado)
-
 actualizarEstadoBotones()
 # ---------------- FOOTER ----------------
 footer = Label(ventana,text="TEC - Taller de Programación",
