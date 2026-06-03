@@ -1,3 +1,6 @@
+# Elaborado por: Jaykel Miranda, Hillary Martinez
+# version de python: 3.14
+
 from tkinter import *
 from tkinter import ttk
 from faker import Faker
@@ -164,6 +167,7 @@ def validarFechaAux(fechaNacimiento):
     dia=int(fecha[0])
     mes=int(fecha[1])
     anno=int(fecha[2])
+    fechaNacimiento = (dia,mes,anno,)
     if mes<1 or mes>12:
         return(False,"El mes ingresado en fecha de nacimiento no existe")
     if anno<1900:
@@ -240,9 +244,11 @@ def validarPesoAux(peso):
     - (True, peso): si el peso es valido
     - (False, mensaje): si el peso no es valido
     """
-    if peso.isdigit()==False:
-        return(False,"El peso solo debe contener numeros")
-    return(True,peso)
+    try:
+        peso = float(peso)
+        return(True,peso)
+    except ValueError:
+        return(False,"El peso ingresado no es un numero valido")
 
 def telefonoInser(frameInsertar):
     """
@@ -492,12 +498,13 @@ def validarDatos(donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,tel
     resultadoCorreo=validarCorreoAux(correo)
     if resultadoCorreo[0]==False:
         return resultadoCorreo
-    donantes.append([nombre,cedula,fechaNacimiento,tipoSangre,
-        sexo,peso,telefono,correo,1,0])
-    guardarDatos(donantes)
+    donantes.append([resultadoNombre[1],
+    cedula,resultadoFecha[1],tipoSangre,sexo,
+    resultadoPeso[1],telefono,correo,1,0])
     return(True,"Donante registrado correctamente")
 
-def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,sexo,peso,telefono,correo,mensaje,lugaresDonacion):
+def registrar(mensajeRegistrar,donantes,cedula,nombre,fechaNacimiento,tipoSangre,
+              sexo,peso,telefono,correo,mensaje,lugaresDonacion):
     """
     Funcionamiento: Esta funcion se encarga de registrar el donante a partir de los datos ingresados por el usuario en la ventana de insertar donante, ademas de validar los datos ingresados y mostrar un mensaje con el resultado del registro
     Entradas:
@@ -700,6 +707,7 @@ def guardarActualizacion(donantes, posicion, cedula, nombre, fechaNacimiento, ti
         peso.get(),
         telefono.get(),
         correo.get(),1,0]
+    guardarDatos(donantes)
     mensajeActualizar.config(text="Donante actualizado correctamente", fg="green")
     mensaje.config(text=generarAnalisisDonante(cedula, fechaNacimiento.get(), tipoSangre.get(), peso.get(), lugaresDonacion), font=("calibri", 11, "bold"))
     mensaje.pack()
@@ -939,6 +947,7 @@ def confirmarInactivacionEspecifica(donantes, posicion, ventanaJustificar, combo
     codigoJustificacion = int(seleccion[0])
     donantes[posicion][-2] = 0 
     donantes[posicion][-1] = codigoJustificacion 
+    guardarDatos(donantes)
     ventanaJustificar.destroy()
     mensajeOriginal.config(text="Donador inhabilitado satisfactoriamente (Estado: 0)", fg="green")
 
@@ -1877,25 +1886,52 @@ def reportes(ventana,donantes):
     Button(frameBotones, text="Limpiar",font=("Arial",12,"bold"),bg="#f44336", fg="white", command=lambda: opciones.set("")).grid(row = 0,column= 1, padx = 10)
     Button(frameBotones,text="Regresar",font=("Arial",12,"bold"),bg="#43C345",fg="white",command=lambda:[ventanaReportes.destroy(),ventana.deiconify()]).grid(row=0,column= 2, padx = 10)
 
-def salir():
-    ventana.destroy()
 # ---------------- BOTONES ----------------
-Button(frameMenu,text="1. Insertar donador",font=("Arial",14),
-    width=30,height=2,bg="#1565c0",fg="white",
-    command=lambda:insertarDonador(ventana,donantes,lugaresDonacion)).grid(row=1,column=0)
-Button(frameMenu,text="2. Generar donadores",font=("Arial",14),
-    width=30,height=2,bg="#1565c0",fg="white",command=lambda:generar(ventana,donantes)).grid(row=1,column=1)
-Button(frameMenu,text="3. Actualizar datos",font=("Arial",14),
-    width=30,height=2,bg="#1565c0",fg="white",command=lambda:actualizarDonador(ventana,donantes,lugaresDonacion)).grid(row=2,column=0)
-Button(frameMenu,text="4. Eliminar donador",font=("Arial",14),
-    width=30,height=2,bg="#1565c0",fg="white",
-    command=lambda:eliminarDonador(ventana,donantes)).grid(row=2,column=1)
-Button(frameMenu,text="5. Insertar lugar",font=("Arial",14),
-    width=30,height=2,bg="#1565c0",fg="white",command=lambda:lugaresDeDonacion(ventana,lugaresDonacion)).grid(row=3,column=0)
-Button(frameMenu,text="6. Reportes",font=("Arial",14),width=30,
-    height=2,bg="#1565c0",fg="white",command=lambda:reportes(ventana,donantes)).grid(row=3,column=1)
-Button(frameMenu,text="7. Salir",font=("Arial",14),width=30,
-    height=2,bg="#2e7d32",fg="white",command=salir).grid(row=4,column=0,columnspan=2)
+btnRegistrar = Button(frameMenu, text="1. Registrar", font=("Arial", 14),
+    width=30, height=2, bg="#1565c0", fg="white",
+    command=lambda: insertarDonador(ventana, donantes, lugaresDonacion))
+btnRegistrar.grid(row=1, column=0)
+
+btnGenerar = Button(frameMenu, text="2. Generar donadores", font=("Arial", 14),
+    width=30, height=2, bg="#1565c0", fg="white",
+    command=lambda: generar(ventana, donantes))
+btnGenerar.grid(row=1, column=1)
+
+# Fila 2: CONDICIONALES (Se desactivan si no hay datos)
+btnActualizar = Button(frameMenu, text="3. Actualizar datos", font=("Arial", 14),
+    width=30, height=2, bg="#1565c0", fg="white",
+    command=lambda: actualizarDonador(ventana, donantes, lugaresDonacion))
+btnActualizar.grid(row=2, column=0)
+
+btnEliminar = Button(frameMenu, text="4. Eliminar donador", font=("Arial", 14),
+    width=30, height=2, bg="#1565c0", fg="white",
+    command=lambda: eliminarDonador(ventana, donantes))
+btnEliminar.grid(row=2, column=1)
+
+# Fila 3: El 5 siempre activo, el 6 es condicional
+btnInsertarLugar = Button(frameMenu, text="5. Insertar lugar", font=("Arial", 14),
+    width=30, height=2, bg="#1565c0", fg="white",
+    command=lambda: lugaresDeDonacion(ventana, lugaresDonacion))
+btnInsertarLugar.grid(row=3, column=0)
+
+btnReportes = Button(frameMenu, text="6. Reportes", font=("Arial", 14),
+    width=30, height=2, bg="#1565c0", fg="white",
+    command=lambda: reportes(ventana, donantes)) 
+btnReportes.grid(row=3, column=1)
+
+# Fila 4: Botón de Salir (Siempre activo, centrado ocupando las dos columnas)
+btnSalir = Button(frameMenu, text="7. Salir", font=("Arial", 14),
+    width=30, height=2, bg="#d32f2f", fg="white",
+    command=ventana.quit)
+btnSalir.grid(row=4, column=0, columnspan=2)
+
+def actualizarEstadoBotones():
+    estado = NORMAL if len(donantes) > 0 else DISABLED
+    btnActualizar.config(state=estado)
+    btnEliminar.config(state=estado)
+    btnReportes.config(state=estado)
+
+actualizarEstadoBotones()
 # ---------------- FOOTER ----------------
 footer = Label(ventana,text="TEC - Taller de Programación",
     font=("Arial black",12),bg="#1f255c",fg="white")
